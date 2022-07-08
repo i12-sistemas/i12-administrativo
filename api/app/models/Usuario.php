@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
-use App\Models\Empresa;
-use App\Models\AuxPermissao;
+use App\models\Empresa;
+use App\models\AuxPermissao;
 use Illuminate\Support\Facades\DB;
 
 class Usuario extends Model

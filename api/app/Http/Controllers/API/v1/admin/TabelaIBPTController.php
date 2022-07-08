@@ -9,8 +9,8 @@ use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Http\Controllers\RetApiController;
-use App\Models\i12TabelaIBPT;
-use App\Models\i12TabelaIBPTLog;
+use App\models\i12TabelaIBPT;
+use App\models\i12TabelaIBPTLog;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 

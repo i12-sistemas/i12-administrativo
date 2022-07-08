@@ -3,7 +3,7 @@
 namespace App\models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\i12LogErro;
+use App\models\i12LogErro;
 
 class Clientes extends Model
 {

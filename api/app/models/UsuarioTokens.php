@@ -32,7 +32,7 @@ class UsuarioTokens extends Model
 
   public function empresa()
   {
-    return $this->hasOne('App\Models\Empresa', 'codempresa', 'idempresa');
+    return $this->hasOne('App\models\Empresa', 'codempresa', 'idempresa');
   }
 
 

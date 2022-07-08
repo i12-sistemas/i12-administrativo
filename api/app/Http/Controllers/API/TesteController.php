@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Exception;
 use App\Http\Controllers\RetApiController;
-use App\Models\Empresa;
+use App\models\Empresa;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 

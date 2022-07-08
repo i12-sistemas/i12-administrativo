@@ -5,9 +5,9 @@ namespace App\Http\Middleware;
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
-use App\Models\UsuarioTokens;
-use App\Models\Usuario;
-use App\Models\Clientes;
+use App\models\UsuarioTokens;
+use App\models\Usuario;
+use App\models\Clientes;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 class AuthiComServicesEmpresa

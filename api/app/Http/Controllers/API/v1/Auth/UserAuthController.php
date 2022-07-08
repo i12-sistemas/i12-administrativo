@@ -11,9 +11,9 @@ use Carbon\Carbon;
 use App\Http\Controllers\RetApiController;
 
 use Validator;
-use App\Models\Usuario;
-use App\Models\Empresa;
-use App\Models\UsuarioTokens;
+use App\models\Usuario;
+use App\models\Empresa;
+use App\models\UsuarioTokens;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
