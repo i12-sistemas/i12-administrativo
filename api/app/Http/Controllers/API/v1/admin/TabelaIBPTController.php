@@ -179,18 +179,13 @@ class TabelaIBPTController extends Controller
           throw new Exception($e->getMessage());
       }          
 
-      // return $disk->download($dataset->filename, $nomeexport, [
-      //   'Content-Type' => 'text/csv',
-      //   'Content-Disposition' => 'inline; filename="'.$nomeexport.'"'
-      // ]);
-
+      return $disk->download($dataset->filename, $nomeexport, [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'inline; filename="'.$nomeexport.'"'
+      ]);
     } catch (\Throwable $th) {
-      $ret->msg = $th->getMessage();
-      return $ret->toJson();
+      return response()->json('Não encontrado: ' . $th->getMessage(), 404);
     }
-    return $ret->toJson();
-
-    
   }
 
 
