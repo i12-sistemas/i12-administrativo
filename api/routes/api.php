@@ -7,6 +7,11 @@
 // });
 
 
+Route::prefix('/')->namespace('API')->group(function () {
+    Route::get('teste', 'TesteController@teste');
+});
+
+
 Route::prefix('/v1/webicom')->namespace('API\v1\webicom')->group(function () {
     Route::post('/clientes/list', 'ClientesController@list');
   
