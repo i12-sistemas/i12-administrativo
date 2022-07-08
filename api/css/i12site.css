@@ -1,0 +1,24 @@
+.chatintegrado-box{
+  width: 552px;
+  border: 1px solid #c7d5e0;
+  position: absolute;
+  margin: 0px;
+  left: 10px;
+  overflow: hidden;
+  border-radius: 5px;
+  top: 10px;
+}
+
+.chatintegrado-box-regras{
+  width: 616px;
+  border: 1px solid #e4e4e4;
+  position: absolute;
+  left: 570px;
+  border-radius: 5px;
+  overflow: hidden;
+  top: 10px;
+  padding: 12px;
+  background: #fbfbfb;
+  color: #263f52;
+  max-width: 320px;
+}

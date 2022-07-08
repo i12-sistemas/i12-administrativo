@@ -1,0 +1,206 @@
+/* Isso é um CSS condicional */
+@media only screen and (max-width: 720px) {
+  .content-all .card-status {
+    width: 87vw;
+  }
+}
+
+.flash-message {
+  position: absolute;
+  width: 400px;
+  right: 0;
+  left: 0;
+  margin: auto;
+  z-index: 999999 !important;
+  top: 60px;
+}
+
+.info-box-number {
+  display: block;
+  font-weight: bold;
+  font-size: 24px !important;
+}
+
+.login-page-usuario {
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ffffff+0,f1f1f1+50,e1e1e1+51,f6f6f6+100;White+Gloss+%231 */
+  background: rgb(255, 255, 255); /* Old browsers */
+  background: -moz-linear-gradient(
+    top,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(241, 241, 241, 1) 50%,
+    rgba(225, 225, 225, 1) 51%,
+    rgba(246, 246, 246, 1) 100%
+  ); /* FF3.6-15 */
+  background: -webkit-linear-gradient(
+    top,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(241, 241, 241, 1) 50%,
+    rgba(225, 225, 225, 1) 51%,
+    rgba(246, 246, 246, 1) 100%
+  ); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(241, 241, 241, 1) 50%,
+    rgba(225, 225, 225, 1) 51%,
+    rgba(246, 246, 246, 1) 100%
+  ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f6f6f6',GradientType=0 ); /* IE6-9 */
+}
+
+.login-page-admin {
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#eaf4ff+27,3690f0+84,3690f0+84,1e69de+96,1e69de+96,d81e1e+100 */
+  background: #eaf4ff; /* Old browsers */
+  background: -moz-linear-gradient(
+    top,
+    #eaf4ff 27%,
+    #3690f0 84%,
+    #3690f0 84%,
+    #1e69de 96%,
+    #1e69de 96%,
+    #d81e1e 100%
+  ); /* FF3.6-15 */
+  background: -webkit-linear-gradient(
+    top,
+    #eaf4ff 27%,
+    #3690f0 84%,
+    #3690f0 84%,
+    #1e69de 96%,
+    #1e69de 96%,
+    #d81e1e 100%
+  ); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(
+    to bottom,
+    #eaf4ff 27%,
+    #3690f0 84%,
+    #3690f0 84%,
+    #1e69de 96%,
+    #1e69de 96%,
+    #d81e1e 100%
+  ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaf4ff', endColorstr='#d81e1e',GradientType=0 ); /* IE6-9 */
+}
+.vbottom {
+  position: relative;
+  top: 100%;
+  transform: translateY(-100%);
+}
+.login-box-resetpw {
+  width: 450px !important;
+}
+/* Customize the label (the container) */
+.containercheck {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/* Hide the browser's default checkbox */
+.containercheck input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+}
+/* On mouse-over, add a grey background color */
+.containercheck:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+/* When the checkbox is checked, add a blue background */
+.containercheck input:checked ~ .checkmark {
+  background-color: #2196f3;
+}
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+/* Show the checkmark when checked */
+.containercheck input:checked ~ .checkmark:after {
+  display: block;
+}
+/* Style the checkmark/indicator */
+.containercheck .checkmark:after {
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+.table-icom {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+}
+.border-left-10-success {
+  border-left: 10px solid #5cb85c !important;
+}
+.border-left-10-danger {
+  border-left: 10px solid #d9534f !important;
+}
+.border-left-10-warning {
+  border-left: 10px solid #f0ad4e !important;
+}
+.border-left-2-primary {
+  border-left: 2px solid #367fa9 !important;
+}
+.border-left-2-success {
+  border-left: 2px solid #5cb85c !important;
+}
+.border-left-2-danger {
+  border-left: 2px solid #d9534f !important;
+}
+.border-left-2-warning {
+  border-left: 2px solid #f0ad4e !important;
+}
+.border-top-2-primary {
+  border-top: 2px solid #367fa9 !important;
+}
+.border-top-2-success {
+  border-top: 2px solid #5cb85c !important;
+}
+.border-top-2-danger {
+  border-top: 2px solid #d9534f !important;
+}
+.border-top-2-warning {
+  border-top: 2px solid #f0ad4e !important;
+}
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active em versões anteriores a 2.1.8 */ {
+  opacity: 0;
+}
+.button-tagged {
+  /* border: 1px solid #ddd; */
+  /* background: #eee !important; */
+  padding: 4px 8px;
+  border-radius: 6px;
+  float: left;
+  margin: 3px;
+}
+

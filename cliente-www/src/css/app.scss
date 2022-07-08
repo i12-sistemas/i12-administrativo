@@ -1,0 +1,44 @@
+// app global css in SCSS form
+
+.border-delimiter {
+  border-left: 3px #027BE3 solid;
+  padding-left: 15px;
+}
+
+.border-delimiter-red {
+  border-left: 3px #f70000 solid;
+  padding-left: 15px;
+}
+
+.q-tooltip {
+  font-size: 11px;
+  color: #212121 !important;
+  background-color: #fff176 !important;
+  border: 1px solid #dbce57 !important;
+  max-width: 450px;
+}
+
+.notepre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+}
+
+
+
+.full-60 {
+  min-width: 60vw;
+  min-height: 60vh;
+}
+
+.full-70 {
+  min-width: 70vw;
+  min-height: 70vh;
+}
+
+.full-90 {
+  min-width: 90vw;
+  min-height: 90vh;
+}
+
+

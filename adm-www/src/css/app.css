@@ -1,0 +1,62 @@
+.border-delimiter, .border-delimiter-primary {
+  border-left: 3px #027BE3 solid;
+  padding-left: 15px;
+}
+.border-delimiter-blue {
+  border-left: 3px #2196f3 solid;
+  padding-left: 15px;
+}
+.border-delimiter-black {
+  border-left: 3px #000000 solid;
+  padding-left: 15px;
+}
+.border-delimiter-green {
+  border-left: 3px #4caf50 solid;
+  padding-left: 15px;
+}
+.border-delimiter-red {
+  border-left: 3px #f70000 solid;
+  padding-left: 15px;
+}
+.desktopdialog {
+  width: 80vw !important;
+  max-width: 80vw !important;
+}
+.q-tooltip {
+  font-size: 13px;
+  background-color: #000000;
+  max-width: 450px;
+}
+.notepre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+}
+.full-50 {
+  min-width: 50vw;
+  min-height: 50vh;
+}
+.full-70 {
+  min-width: 70vw;
+  min-height: 70vh;
+}
+.full-90 {
+  min-width: 90vw;
+  min-height: 90vh;
+}
+
+a:link {
+  text-decoration: none;
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+a:active {
+  text-decoration: none;
+}

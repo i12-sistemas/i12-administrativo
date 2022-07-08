@@ -1,0 +1,15 @@
+.btn-urgente,
+.btn-urgente:active,
+.btn-urgente:visited,
+.btn-urgente:focus {
+    background-color: white;
+    border-color:#fbe629;
+    color: #060600;
+}
+
+
+.btn-urgente:hover {
+  background-color: #dcc814;
+  border-color: #dcc814;
+  color: #060600;
+}

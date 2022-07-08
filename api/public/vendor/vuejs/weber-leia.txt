@@ -1,0 +1,11 @@
+Weber 29/03/2018
+
+Site de download
+https://br.vuejs.org/v2/guide/installation.html
+
+
+vue.js 			= 	Mensagens de erro completas e modo de depuração
+vue.min.js 		=	Sem mensagens de erro, 30.90KB min+gzip
+
+Notas de Lançamento
+Última versão estável: 2.5.16

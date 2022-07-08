@@ -1,0 +1,76 @@
+
+.header{
+    margin-bottom: 10px;
+    width: 100%;
+    height: 44px;
+    line-height: 40px;
+    background-color: #dc3545;
+    color: white;
+}
+
+.footer{
+    margin-top: 25px;
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    background-color: #f5f5f5;
+}
+.card-block {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+.row-ajuste{
+    padding: 0 15px !important;
+}
+
+.card-header {
+    padding: 3px 8px !important;
+}
+
+.card-atividade {
+    margin-top: 5px !important;
+}
+
+.card-header-atividade {
+    padding: 3px 8px !important;
+    background: #f8f9fa;
+}
+
+.item-atividade-danger{
+    border-left: 3px solid #dc3545;
+    border-bottom: 4px solid white
+}
+.item-atividade-warning{
+    border-left: 3px solid #ffc107;
+    border-bottom: 4px solid white
+}
+.item-atividade-success{
+    border-left: 3px solid #28a745;
+    border-bottom: 4px solid white
+}
+
+.projeto-content{
+    border-bottom: 1px solid #dc3545;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+.projeto-content .titulo{
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+.projeto-content .cliente{
+    font-size: large;
+    font-weight: bold;
+}
+.caption{
+    font-size: small;
+    font-weight: normal;
+}
+
+.card-body-mini{
+    padding: 5px !important;
+}
