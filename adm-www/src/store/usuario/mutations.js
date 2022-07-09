@@ -17,7 +17,6 @@ export const setusuariologado = async (state, dados) => {
     var lUser = new Usuario(dados.usuario)
     var lUserObj = JSON.parse(JSON.stringify(lUser))
     state.usuario = lUserObj
-    console.log(state.usuario)
     state.logado = true
     var instance = Vue.prototype.$axios
     instance.defaults.headers.common['x-auth-token'] = state.token
@@ -29,7 +28,6 @@ export const setusuariologado = async (state, dados) => {
 
 export const setlocalstorage = async (state, dados) => {
   try {
-    console.log('setlocalstorage', dados)
     localStorage.setItem('user_token', dados.token)
     localStorage.setItem('user_tokenexpire_at', dados.expire_at)
     localStorage.setItem('user_login', dados.login)

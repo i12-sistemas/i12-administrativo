@@ -29,7 +29,6 @@ export async function checklogon ({ commit, state, dispatch }) {
   })
   await commit('setret', ret)
   if (ret.ok) {
-    console.log(ret.data)
     await commit('setusuariologado', ret.data)
     // if (state.logado) {
     //   var pusher = Vue.prototype.$pusher

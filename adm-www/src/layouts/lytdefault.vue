@@ -57,6 +57,12 @@
             </q-item-section>
             <q-item-section>Tabela IBPT</q-item-section>
           </q-item>
+          <q-item clickable  v-ripple :to="{ name: 'servidores' }" v-if="(usuariologado)" >
+            <q-item-section avatar>
+              <q-icon name="dashboard" />
+            </q-item-section>
+            <q-item-section>Servidores</q-item-section>
+          </q-item>
           <q-item clickable  v-ripple :to="{ name: 'tabelaibpt' }" v-if="(usuariologado)" >
             <q-item-section avatar>
               <q-icon name="dashboard" />

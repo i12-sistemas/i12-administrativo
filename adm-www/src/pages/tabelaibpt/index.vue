@@ -110,7 +110,9 @@ export default {
     async actAdd () {
       var app = this
       var ret = app.dataset.showAdd(app)
-      console.log(ret)
+      if (ret.ok) {
+        app.refreshData(null)
+      }
     },
     async actEditDialog (rowIndex) {
       var app = this
@@ -132,7 +134,6 @@ export default {
           }
         ]
       }).onOk(async action => {
-        console.log(action)
         if (action.id === 'delete') {
           var retDelete = await row.deleteWithQuestion(app)
           if (retDelete.ok) {
@@ -156,9 +157,7 @@ export default {
         app.error = null
         app.dataset.readPropsTable(props)
         var ret = await app.dataset.fetch()
-        console.log(ret)
         if (ret.ok) {
-          console.log(app.dataset)
           app.rows = app.dataset.itens
         } else {
           var a = app.$helpers.showDialog(ret)

@@ -20,7 +20,7 @@ class Clientes extends Model
     }
     public function setnomeAttribute($value)
     {
-        $this->attributes['nome'] = ucutf8dec($value);
+        $this->attributes['nome'] = utf8_decode($value);
     }    
 
     public function getfantasiaAttribute($value)

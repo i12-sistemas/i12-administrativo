@@ -105,7 +105,6 @@ export default {
     onRejected (rejectedEntries) {
       // Notify plugin needs to be installed
       // https://quasar.dev/quasar-plugins/notify#Installation
-      console.log(rejectedEntries)
       this.$q.notify({
         type: 'negative',
         message: `${rejectedEntries.length} arquivo não foi carregado devido a restrição de tamanho ou extensão`
@@ -116,14 +115,8 @@ export default {
       app.loading = true
       var ret = { ok: false }
       try {
-        console.log(app.uf)
-        console.log(app.semestre)
-        console.log(app.ano)
-        console.log(app.file)
         var dataset = new TabelasIbpt()
-        console.log(dataset)
         ret = await dataset.upload(app.file, app.uf, app.semestre, app.ano)
-        console.log(ret)
         if (!ret.ok) {
           var aRet = app.$helpers.showDialog(ret)
           await aRet.then(function () {})

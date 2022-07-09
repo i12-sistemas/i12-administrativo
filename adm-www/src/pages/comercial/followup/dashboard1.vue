@@ -432,7 +432,6 @@ export default {
         app.datefinal = ret.valuef
         await app.refreshData()
       } else {
-        console.log(ret)
         if (ret.msg ? ret.msg !== '' : false) {
           var a = app.$helpers.showDialog(ret)
           await a.then(function () {

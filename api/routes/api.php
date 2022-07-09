@@ -67,17 +67,23 @@ Route::prefix('/v1/icomservices')->namespace('API\v1\icomServices')->middleware(
 
 Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'useradmin'], ['except' => ['tabelaibpt.download']])->group(function () {
 
-  
-  Route::get('tabelaibpt/old', 'TabelaIBPTController@OldFormat_index');
-  Route::delete('tabelaibpt/old', 'TabelaIBPTController@OldFormat_delete');
-  
-  Route::get('tabelaibpt', 'TabelaIBPTController@index');
-  Route::post('tabelaibpt/upload', 'TabelaIBPTController@upload');
-  Route::delete('tabelaibpt', 'TabelaIBPTController@delete');
-  
-  Route::get('tabelaibpt/logs', 'TabelaIBPTController@logs');
-  
-  Route::get('tabelaibpt/download/{uf}', 'TabelaIBPTController@download')->withoutMiddleware('useradmin');
+  Route::group(['prefix' => 'servidores'], function () {
+    Route::get('/', 'i12DatabasesController@index');
+  });
+
+  Route::group(['prefix' => 'tabelaibpt'], function () {
+    Route::get('old', 'TabelaIBPTController@OldFormat_index');
+    Route::delete('old', 'TabelaIBPTController@OldFormat_delete');
+    
+    Route::get('/', 'TabelaIBPTController@index');
+    Route::post('upload', 'TabelaIBPTController@upload');
+    Route::delete('/', 'TabelaIBPTController@delete');
+    
+    Route::get('logs', 'TabelaIBPTController@logs');
+    
+    Route::get('download/{uf}', 'TabelaIBPTController@download')->withoutMiddleware('useradmin');
+  });
+
   
 });
 
