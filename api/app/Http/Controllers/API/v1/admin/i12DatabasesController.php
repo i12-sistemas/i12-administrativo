@@ -34,7 +34,7 @@ class i12DatabasesController extends Controller
       if (!$usuario) throw new Exception('Nenhum usuário loagdo');
 
       $ambiente = isset($request->ambiente) ? strval($request->ambiente) : '1';
-      if ($ambiente !== '2') $ambiente = '2';
+      if ($ambiente !== '2') $ambiente = '1';
       $perpage = isset($request->perpage) ? $request->perpage : 25;
       $dataset = i12Databases::select(
                         DB::raw('i12_databases.*'), 
