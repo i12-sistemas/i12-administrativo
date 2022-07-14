@@ -28,7 +28,10 @@ const routes = [
       { name: 'tabelaibpt', path: '/tabelaibpt', component: () => import('pages/tabelaibpt/index.vue'), meta: { permissao: 'tabelaibpt.index' } },
       { name: 'tabelaibpt.log', path: '/tabelaibpt/log', component: () => import('pages/tabelaibpt/log-download.vue'), meta: { permissao: 'tabelaibpt.index' } },
 
-      { name: 'servidores', path: '/servidores', component: () => import('pages/servidores/index.vue'), meta: { permissao: 'servidores.index' } }
+      { name: 'servidores', path: '/servidores', component: () => import('pages/servidores/index.vue'), meta: { permissao: 'servidores.index' } },
+      { name: 'backup', path: '/backup', component: () => import('pages/backup/index.vue'), meta: { permissao: 'backup.index' } },
+      { name: 'backup.listagem', path: '/backup/listagem', component: () => import('pages/backup/listagem.vue'), meta: { permissao: 'backup.listagem' } },
+      { name: 'backup.cliente.detalhe', path: '/backup/cliente/:doc', component: () => import('pages/backup/cliente-detalhe.vue'), meta: { permissao: 'backup.cliente.detalhe' } }
       // { name: 'coletas.consulta', path: '/coletas', props: true, component: () => import('pages/operacional/coletas/consulta.vue') },
 
       // { name: 'rastrear', path: '/entregas/rastrear/:chave', props: true, component: () => import('pages/operacional/carga/rastrear.vue') },

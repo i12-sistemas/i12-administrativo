@@ -14,6 +14,7 @@ class I12BackupfileS3 extends Model
   protected $dates = [
       'lastmodified',
       'lastcheck',
+      'ultimolastmodified',
   ];  
 
   public function setfilenameAttribute($value)

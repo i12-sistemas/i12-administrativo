@@ -59,6 +59,12 @@ Route::prefix('/v1/icomservices')->namespace('API\v1\icomServices')->middleware(
   Route::group(['prefix' => 'server'], function () {
     Route::post('/', 'i12DatabasesController@update');
   });
+  
+  Route::group(['prefix' => 'meiocomunicacao'], function () {
+    Route::post('/verificar', 'ValidarMeioComunicacaoController@verificar');
+    Route::post('/validar', 'ValidarMeioComunicacaoController@validar');
+    Route::post('/zap', 'ValidarMeioComunicacaoController@zap');
+  });
 
   Route::group(['prefix' => 'terminal'], function () {
     Route::post('/', 'i12TerminaisController@update');
@@ -70,6 +76,22 @@ Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'user
   Route::group(['prefix' => 'servidores'], function () {
     Route::get('/', 'i12DatabasesController@index');
   });
+
+
+  Route::group(['prefix' => 'backup'], function () {
+    // Route::get('/', 'i12DatabasesController@index');
+    
+    Route::get('/', 'BackupController@list');
+    Route::get('dash', 'BackupController@dash');
+    Route::get('report/alert', 'BackupController@reportalert')->name('adm.backup.report.alert');
+    Route::get('list/{diretorio}/files', 'BackupController@listfile')->name('adm.backup.list.files');
+    Route::get('list/{diretorio}/sync', 'BackupController@sync')->name('adm.backup.list.sync');
+    Route::post('delete', 'BackupController@deletefiles')->name('adm.backup.delete');
+    Route::get('download/{md5}', 'BackupController@download')->name('adm.backup.download');
+  });
+
+
+  //     // backup
 
   Route::group(['prefix' => 'tabelaibpt'], function () {
     Route::get('old', 'TabelaIBPTController@OldFormat_index');

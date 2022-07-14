@@ -19,10 +19,10 @@ class ChamadoInteracaoMail extends Mailable
     public function build()
     {
         $content = $this->content;
-        $chamado = $content['chamado'];
-        $destinatario = $content['destinatario'];
-        $empresa = $content['empresa'];
-        $assunto = $content['assunto'];
+        // $chamado = $content['chamado'];
+        // $destinatario = $content['destinatario'];
+        // $empresa = $content['empresa'];
+        // $assunto = $content['assunto'];
         
 
         return $this->markdown('painelcliente.mail.chamadosinteracao') //pass here your email blade file

@@ -53,13 +53,13 @@
           <!-- <q-item clickable  v-ripple :to="{ name: 'home' }" v-if="(usuariologado ? usuariologado.permitestatusgeral : false)" > -->
           <q-item clickable v-ripple :to="{ name: 'tabelaibpt' }" v-if="(usuariologado)" >
             <q-item-section avatar>
-              <q-icon name="dashboard" />
+              <q-icon name="money" />
             </q-item-section>
             <q-item-section>Tabela IBPT</q-item-section>
           </q-item>
           <q-item clickable  v-ripple :to="{ name: 'servidores' }" v-if="(usuariologado)" >
             <q-item-section avatar>
-              <q-icon name="dashboard" />
+              <q-icon name="dns" />
             </q-item-section>
             <q-item-section>Servidores</q-item-section>
           </q-item>
@@ -87,11 +87,17 @@
             </q-item-section>
             <q-item-section>Erros</q-item-section>
           </q-item>
-          <q-item clickable  v-ripple :to="{ name: 'tabelaibpt' }" v-if="(usuariologado)" >
+          <q-item clickable  v-ripple :to="{ name: 'backup' }" v-if="(usuariologado)" >
             <q-item-section avatar>
-              <q-icon name="dashboard" />
+              <q-icon name="cloud_sync" />
             </q-item-section>
             <q-item-section>Backup</q-item-section>
+          </q-item>
+          <q-item clickable  v-ripple :to="{ name: 'backup.listagem' }" v-if="(usuariologado)" >
+            <q-item-section avatar>
+              <q-icon name="cloud_sync" />
+            </q-item-section>
+            <q-item-section>Backup listagem</q-item-section>
           </q-item>
         </q-list>
       </q-scroll-area>
@@ -289,14 +295,14 @@ export default {
 }
 .doc-page {
   padding: 16px 46px;
-  padding-top: 80px;
+  padding-top: 35px;
   font-weight: 300;
   max-width: 900px;
   margin-left: auto;
   margin-right: auto
 }
 .doc-header {
-  padding-top: 80px;
+  padding-top: 35px;
 }
 .dialogfullheightdesktop {
   width: 700px;
@@ -314,10 +320,10 @@ export default {
 @media (max-width: 600px) {
   .doc-page {
     padding: 0px;
-    padding-top: 45px;
+    padding-top: 35px;
   }
   .doc-header {
-    padding-top: 45px;
+    padding-top: 55px;
   }
   .titletoobarcustom {
     min-width: auto;
@@ -327,4 +333,12 @@ export default {
   .header-item {
     background-color: #d6d1d1;
   }
+
+.header-top-bg {
+  height: 110px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0 0 8px 8px;
+}
 </style>

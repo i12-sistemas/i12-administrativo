@@ -57,8 +57,13 @@ class CorsMiddleware
             'http://i12sistemas.icom.api.local:9001',
             'https://localhost:8080/',
             'http://localhost:8089',
+            'http://localhost:8089/',
             'https://localhost:8089',
-            'http://localhost:8080/'
+            'http://localhost:8080/',
+            'http://192.168.0.112:8089/',
+            'http://192.168.0.112:8089',
+            'http://192.168.0.112',
+            'http://localhost',
         ];
         $origin = '*';
         if (in_array($http_origin , $origin_allowed)) $origin = $http_origin;
