@@ -3,7 +3,6 @@
 namespace App\models;
 
 use Illuminate\Database\Eloquent\Model;
-use Ramsey\Uuid\Uuid;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
  
@@ -28,7 +27,7 @@ class i12ChecagemMeioComunicacao extends Model
     parent::boot();
 
     self::creating(function ($model) {
-      $model->id = Uuid::uuid4();
+      $model->id = \Str::uuid();
     });
   }
 
