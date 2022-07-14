@@ -28,7 +28,8 @@ class i12ChecagemMeioComunicacao extends Model
     parent::boot();
 
     self::creating(function ($model) {
-      $model->id = Uuid::uuid4();
+      $uuid4 = Uuid::uuid4();
+      $model->id = $uuid4->toString();
     });
   }
 
