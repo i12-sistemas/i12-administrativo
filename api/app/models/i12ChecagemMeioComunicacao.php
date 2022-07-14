@@ -5,6 +5,7 @@ namespace App\models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
  
 class i12ChecagemMeioComunicacao extends Model 
 {
@@ -27,7 +28,7 @@ class i12ChecagemMeioComunicacao extends Model
     parent::boot();
 
     self::creating(function ($model) {
-      $model->id = \Str::uuid();
+      $model->id = Str::uuid();
     });
   }
 
