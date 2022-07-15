@@ -23,15 +23,17 @@ class BackupDeleteJob implements ShouldQueue
 
     private $dados;
     private $usuario;
+    private $ip;
 
     public $tries = 3;
     public $maxExceptions = 3;
     public $timeout = 120;
 
-    public function __construct($dados, $usuario)
+    public function __construct($dados, $usuario, $ip)
     {
       $this->dados = $dados;
       $this->usuario = $usuario;
+      $this->ip = $ip;
     }
 
     public function handle()
@@ -70,7 +72,7 @@ class BackupDeleteJob implements ShouldQueue
           throw new Exception($e->getMessage());
         }
 
-        \Mail::to(env('MAIL_SUPORTE', ''))->send(new BackupDeleteMail($lisdeleted, $this->usuario));
+        \Mail::to(env('MAIL_SUPORTE', ''))->send(new BackupDeleteMail($lisdeleted, $this->usuario, $this->ip));
 
       } catch (Exception $e) {
         throw new Exception($e->getMessage());

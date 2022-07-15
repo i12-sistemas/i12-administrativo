@@ -15,11 +15,13 @@ class BackupDeleteMail extends Mailable
 
     protected $arquivos;
     protected $usuario;
+    protected $ip;
 
-    public function __construct($arquivos, $usuario)
+    public function __construct($arquivos, $usuario, $ip)
     {
       $this->arquivos = $arquivos;
       $this->usuario = $usuario;
+      $this->ip = $ip;
 
     }
 
@@ -31,7 +33,7 @@ class BackupDeleteMail extends Mailable
       }
       $info = (object)[
         'dhacao' => Carbon::now(),
-        'ip' => \Request::getClientIp(true),
+        'ip' => $this->ip,
         'qtde' => count($this->arquivos),
         'size' => $size
       ];

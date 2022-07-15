@@ -391,7 +391,8 @@ class BackupController extends Controller
 
       $dados = I12BackupfileS3::whereIn('md5', $ids)->orderBy('lastmodified')->get();  
 
-      BackupDeleteJob::dispatch($dados, $usuario);
+      $ip = \Request::getClientIp(true);
+      BackupDeleteJob::dispatch($dados, $usuario, $ip);
 
       $ret->msg=count($dados) . ' arquivo(s) incluidos na fila de exclusão';
       $ret->ok=True;
