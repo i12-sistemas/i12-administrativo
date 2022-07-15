@@ -17,12 +17,6 @@ class BackupInventory extends Command
      * @var string
      */
     protected $signature = 'backup:get';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Command description';
 
     /**
@@ -38,7 +32,7 @@ class BackupInventory extends Command
    
     public function handle()
     {
-      $cc = app()->make('App\Http\Controllers\adm\BackupController');
+      $cc = app()->make('App\Http\Controllers\API\v1\admin\BackupController');
 
       $diskatual = 's3backup_1';
 

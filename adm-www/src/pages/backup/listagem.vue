@@ -10,7 +10,7 @@
         <q-card class="bg-white " flat bordered  :class="$q.platform.is.mobile ? 'q-ma-sm' : ''">
           <q-card-section>
             <div class="row q-col-gutter-sm">
-              <div class="col-md-6 col-xs-12">
+              <div class="col-xs-12 col-md-4">
                 <q-input outlined debounce="700" v-model="filter" placeholder="Informe qualquer Informação para pesquisar" label="Procurar" clearable :dense="!$q.platform.is.mobile"
                   hint="Ex.: CNPJ, nome do cliente e etc...">
                   <template v-slot:prepend>
@@ -18,11 +18,11 @@
                   </template>
                 </q-input>
               </div>
-              <div class="col-xs-12 col-md-3">
+              <div class="col-xs-12 col-md-2">
                 <q-select v-model="filterstatus" label="Status" outlined emit-value stack-label map-options class="q-mr-xs" :dense="!$q.platform.is.mobile"
-                  :options="[ { value: '2', label: 'Todos' }, { value: '1', label: 'Ativos' }, { value: '0', label: 'Inativo' } ]" />
+                  :options="[ { value: '2', label: 'Todos' }, { value: '1', label: 'Ativos' }, { value: '20', label: 'Em alerta' }, { value: '0', label: 'Inativo' } ]" />
               </div>
-              <div class="col-12">
+              <div class="col-xs-12 col-md-6">
                 <div class="q-gutter-sm">
                   <q-checkbox v-for="(option, k) in opcoesNivel.options" :key="'nivel' + k" v-model="filternivel"
                     :val="option.value" :label="option.desc" :color="option.color" />
@@ -123,10 +123,15 @@
                   <template v-slot:body-cell-ultimolastmodified="props">
                     <q-td :props="props" >
                       <div >
-                        <div v-if="props.row.ultimolastmodified">
+                        <div v-if="props.row.ultimolastmodified"
+                          :class="(props.row.ultimolastmodifiedhour ? props.row.ultimolastmodifiedhour > 72 : true) ? 'rounded-borders bg-red-1 text-red text-weight-bold' : ''"
+                            >
                           <div>{{$helpers.datetimeRelativeToday(props.row.ultimolastmodified)}}</div>
                           <q-tooltip>
                             <div v-if="props.row.ultimolastmodified">Último backup em {{ $helpers.datetimeToBR(props.row.ultimolastmodified, false, true) }}</div>
+                            <div v-if="(props.row.ultimolastmodifiedhour ? props.row.ultimolastmodifiedhour > 72 : true)" class="q-pa-md q-mt-md rounded-borders bg-red-1 text-red text-weight-bold">
+                              Último backup ocorreu a mais de 72 horas
+                            </div>
                           </q-tooltip>
                         </div>
                       </div>
@@ -188,7 +193,6 @@ export default {
     if (app.$route.query) await app.queryRead(app.$route.query)
     await app.refreshData(null)
   },
-
   methods: {
     async queryRead (pQuery) {
       var app = this

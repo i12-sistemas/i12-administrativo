@@ -31,7 +31,7 @@ class BackupDeleteMail extends Mailable
       }
       $info = (object)[
         'dhacao' => Carbon::now(),
-        'ip' => \Request::ip(),
+        'ip' => \Request::getClientIp(true),
         'qtde' => count($this->arquivos),
         'size' => $size
       ];

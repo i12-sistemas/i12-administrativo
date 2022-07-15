@@ -14,6 +14,7 @@ class BackupCliente {
     this.lastmodified = null
     this.lastcheck = null
     this.ultimolastmodified = null
+    this.ultimolastmodifiedhour = null
     this.totalsize = 0
     this.qtdearquivos = 0
     this.bucket = 0
@@ -31,6 +32,7 @@ class BackupCliente {
     if (typeof item.lastmodified !== 'undefined') self.lastmodified = item.lastmodified
     if (typeof item.lastcheck !== 'undefined') self.lastcheck = item.lastcheck
     if (typeof item.ultimolastmodified !== 'undefined') self.ultimolastmodified = item.ultimolastmodified
+    if (typeof item.ultimolastmodifiedhour !== 'undefined') self.ultimolastmodifiedhour = item.ultimolastmodifiedhour
     if (typeof item.totalsize !== 'undefined') self.totalsize = item.totalsize
     if (typeof item.qtdearquivos !== 'undefined') self.qtdearquivos = item.qtdearquivos
     if (typeof item.bucket !== 'undefined') self.bucket = item.bucket

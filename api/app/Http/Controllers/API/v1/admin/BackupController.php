@@ -12,8 +12,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\models\I12BackupfileS3;
 use App\models\Clientes;
+use App\models\I12BackupfileS3Log;
 use App\Jobs\adm\BackupDeleteJob;
 use App\Jobs\adm\BackupDownloadJob;
+use Illuminate\Support\Str;
 
 use App\Http\Controllers\RetApiController;
 use Illuminate\Support\Facades\Auth;
@@ -103,6 +105,7 @@ class BackupController extends Controller
       $qtdeclientes = Clientes::where('ativo', '=', 1)->whereIn('i12controlabkp', [1, 2])->count();
       $totalsize = I12BackupfileS3::sum('size');
       $totalqtde = I12BackupfileS3::count();
+    
 
       $ativos = I12BackupfileS3::select(
           DB::Raw('sum(if(clientes.i12controlabkp=2, i12_backupfiles3.size, 0)) as pagosize'), 
@@ -117,7 +120,8 @@ class BackupController extends Controller
           $query->on(DB::raw('if(clientes.pessoa="F", concat("000", clientes.cpf), clientes.cnpj)'), '=', 'i12_backupfiles3.cnpj');
         })
         ->where('clientes.ativo','=', 1)
-        ->first();    
+        ->first(); 
+
 
       $inativos = I12BackupfileS3::select(
                     DB::Raw('sum(i12_backupfiles3.size) as size'), 
@@ -132,6 +136,22 @@ class BackupController extends Controller
             })
             ->whereRaw('(clientes.codcliente is null) or (clientes.ativo=0)')
             ->first();
+
+
+            
+      $clienteEmAlerta = Clientes::select('clientes.*',
+            DB::Raw('sum(i12_backupfiles3.size) as totalsize'), 
+            DB::Raw('max(i12_backupfiles3.lastmodified) as ultimolastmodified'),
+            DB::Raw('count(distinct i12_backupfiles3.md5) as qtdearquivos'),
+            DB::RAW('TIMESTAMPDIFF(HOUR, max(i12_backupfiles3.lastmodified), NOW()) as horasatras')
+          )
+        ->leftJoin('i12_backupfiles3', DB::RAW('if(clientes.pessoa="F",concat("000",clientes.cpf),clientes.cnpj)'), '=', 'i12_backupfiles3.cnpj' )
+        ->where('clientes.ativo', '=', 1)
+        ->havingRaw('(horasatras > ?) or (horasatras is null)', [72])
+        ->whereIn('clientes.i12controlabkp', [1,2])
+        ->groupBy('clientes.codcliente')
+        ->get();
+
 
       $dados = (object)[
         'nivelpago' => (object)[
@@ -159,6 +179,7 @@ class BackupController extends Controller
         ],
         'total' => (object)[
           'qtdeclientes' => $qtdeclientes,
+          'emalertaclientes' => $clienteEmAlerta ? count($clienteEmAlerta) : 0,
           'qtde' => $totalqtde,
           'size' => $totalsize,
           'mediaarquivos' => ($totalqtde> 0 ? round($totalsize / $totalqtde, 0) : 0),
@@ -191,15 +212,24 @@ class BackupController extends Controller
       
       $perpage = isset($request->perpage) ? $request->perpage : 20;
       $status = isset($request->status) ? strVal($request->status) : '1';
+      $alerta = false;
+      if ($status === '20') {
+        $status = '1';
+        $alerta = true;
+        $nivel = [1,2];
+      }
 
-      $dataset = I12BackupfileS3::select('i12_backupfiles3.*',
+      $dataset = Clientes::select('clientes.*',
               DB::Raw('sum(i12_backupfiles3.size) as totalsize'), 
               DB::Raw('max(i12_backupfiles3.lastmodified) as ultimolastmodified'),
-              DB::Raw('count(distinct i12_backupfiles3.md5) as qtdearquivos'))
-          ->with('cliente')
-          ->leftJoin('clientes', function($query){
-            $query->on(DB::raw('if(clientes.pessoa="F", concat("000", clientes.cpf), clientes.cnpj)'), '=', 'i12_backupfiles3.cnpj');
-          })
+              DB::Raw('count(distinct i12_backupfiles3.md5) as qtdearquivos'),
+              DB::RAW('TIMESTAMPDIFF(HOUR, max(i12_backupfiles3.lastmodified), NOW()) as horasatras')
+            )
+          // ->with('cliente')
+          ->leftJoin('i12_backupfiles3', DB::RAW('if(clientes.pessoa="F",concat("000",clientes.cpf),clientes.cnpj)'), '=', 'i12_backupfiles3.cnpj' )
+          // ->leftJoin('clientes', function($query){
+          //   $query->on(DB::raw('if(clientes.pessoa="F", concat("000", clientes.cpf), clientes.cnpj)'), '=', 'i12_backupfiles3.cnpj');
+          // })
           //status 
           //="[ { value: '2', label: 'Todos' }, { value: '1', label: 'Ativos' }, { value: '0', label: 'Inativo' } ]"
           ->when(($status === '1' || $status === '0'), function ($query) use ($status) {
@@ -209,6 +239,10 @@ class BackupController extends Controller
               return $query->whereRaw('(clientes.codcliente is null) or (clientes.ativo!=1)');
             }
           })
+          ->when($alerta, function ($query) {
+            return $query->havingRaw('(horasatras > ?) or (horasatras is null)', [72]);
+          })
+          
           ->when(($request->has('find') && ($find ? $find !== '' : false)), function ($query) use ($find) {
             return $query->where('clientes.nome', 'like', '%' . $find . '%')
                       ->orWhere('clientes.fantasia', 'like', '%' . $find . '%')
@@ -218,44 +252,28 @@ class BackupController extends Controller
           ->when($nivel, function ($query) use ($nivel) {
             return $query->whereIn('clientes.i12controlabkp', $nivel);
           })
-          ->groupBy('i12_backupfiles3.cnpj')
+          ->groupBy('clientes.codcliente')
           ->orderBy('totalsize', 'desc')
           ->paginate($perpage);
 
       $dados = [];
       foreach ($dataset as $row) {
         $linha = [
-          'id' => $row->id,
-          'md5' => $row->md5,
-          'filename' => $row->filename,
-          'size' => $row->size,
-          'lastmodified' => $row->lastmodified ? $row->lastmodified->format('Y-m-d H:i:s') : null,
-          'lastcheck' => $row->lastcheck ? $row->lastcheck->format('Y-m-d H:i:s') : null,
+          'cliente' => [
+            'id' => $row->codcliente,
+            'doc' => $row->pessoa === 'J' ? $row->cnpj : $row->cpf,
+            'nome' => $row->nome,
+            'controlabkp' => $row->i12controlabkp,
+            'fantasia' => $row->fantasia,
+            'cidade' => $row->cidade,
+            'uf' => $row->uf,
+            'ativo' => $row->ativo,
+          ],
           'ultimolastmodified' => $row->ultimolastmodified ? $row->ultimolastmodified->format('Y-m-d H:i:s') : null,
+          'ultimolastmodifiedhour' => $row->horasatras,
           'totalsize' => $row->totalsize,
           'qtdearquivos' => $row->qtdearquivos,
-          'bucket' => $row->bucket,
         ];
-        if ($row->cliente ? $row->cliente->codcliente > 0 : false) {
-          $cliente = [
-            'id' => $row->cliente->codcliente,
-            'doc' => $row->cliente->pessoa === 'J' ? $row->cliente->cnpj : $row->cliente->cpf,
-            'nome' => $row->cliente->nome,
-            'controlabkp' => $row->cliente->i12controlabkp,
-            'fantasia' => $row->cliente->fantasia,
-            'cidade' => $row->cliente->cidade,
-            'uf' => $row->cliente->uf,
-            'ativo' => $row->cliente->ativo,
-          ];
-        } else {
-          $cliente = [
-            'doc' => $row->cnpj,
-            'nome' => 'Sem cadastro',
-            'controlabkp' => 9,
-            'ativo' => 0
-          ];
-        }
-        $linha['cliente'] = $cliente;
         $dados[] = $linha;
       }
       $ret->collection=$dataset;
@@ -271,78 +289,193 @@ class BackupController extends Controller
 
   //view
   public function listfile(Request $request, $diretorio)  {
+    $ret = new RetApiController;
+    try {
+      $perpage = isset($request->perpage) ? $request->perpage : 20;
+      try {
+        $mesano = isset($request->mesano) ? strval($request->mesano) : null;
+        if ($mesano ? $mesano !== '' : false) {
+          $mesano = Carbon::createFromFormat('Y-m-d', $mesano . '-01', 'America/Sao_Paulo');
+        } else {
+          $mesano = null;
+        }
+      } catch (\Throwable $th) {
+        $mesano = null;
+      }      
+      
+      $dataset = I12BackupfileS3::select('i12_backupfiles3.*', DB::raw('ifnull(count(i12_backupfiles3_log.id),0) as downloadcount'))
+          ->where('i12_backupfiles3.cnpj', '=', $diretorio)
+          ->leftJoin('i12_backupfiles3_log', 'i12_backupfiles3.md5', '=', 'i12_backupfiles3_log.md5file')
+          ->when($request->has('mesano') && ($mesano ? $mesano !== '' : false), function ($query) use ($mesano) {
+            return $query->whereRaw('LAST_DAY(i12_backupfiles3.lastmodified)=LAST_DAY(?)', [$mesano]);
+          })  
+          ->orderBy('i12_backupfiles3.lastmodified', 'desc')
+          ->groupBy('i12_backupfiles3.md5')
+          ->paginate($perpage);
 
-    $pagesize = isset($request->page_size) ? $request->page_size : 15;
-    $mes = isset($request->mes) ? intval($request->mes) : 0;
-    $ano = isset($request->ano) ? intval($request->ano) : 0;
-    $cliente = Clientes::whereRaw('if(pessoa="F", concat("000", cpf), cnpj)=?', [$diretorio])
-                ->first();
-    
-    $dados = I12BackupfileS3::where('i12_backupfiles3.cnpj', '=', $diretorio)
-              ->when(isset($request->mes) && (($mes>0) && ($mes<=12)), function ($query) use ($mes) {
-                return $query->whereRaw('MONTH(i12_backupfiles3.lastmodified)=?', [$mes]);
-              })  
-              ->when(isset($request->ano) && (($ano>2000) && ($ano<=3000)), function ($query) use ($ano) {
-                return $query->whereRaw('YEAR(i12_backupfiles3.lastmodified)=?', [$ano]);
-              })    
-              ->orderBy('lastmodified', 'desc')
-              ->paginate($pagesize);
+      $dados = [];
+      foreach ($dataset as $row) {
+        $linha = [
+          'md5' => $row->md5,
+          'filename' => $row->filename,
+          'size' => $row->size,
+          'lastmodified' => $row->lastmodified ? $row->lastmodified->format('Y-m-d H:i:s') : null,
+          'lastcheck' => $row->lastcheck ? $row->lastcheck->format('Y-m-d H:i:s') : null,
+          'size' => $row->size,
+          'bucket' => $row->bucket,
+          'downloadcount' => $row->downloadcount,
+        ];
+        $dados[] = $linha;
+      }                
+         
 
-    $resumo = I12BackupfileS3::select(
-              DB::raw('min(i12_backupfiles3.lastmodified) as primeirolastmodified'),
-              DB::raw('sum(i12_backupfiles3.size) as totalsize'),
-              DB::raw('max(i12_backupfiles3.lastmodified) as ultimolastmodified'),
-              DB::raw('count(distinct i12_backupfiles3.md5) as qtdearquivos'),
-            )
-            ->where('i12_backupfiles3.cnpj', '=', $diretorio)
-            ->orderBy('lastmodified', 'desc')
-            ->groupBy(DB::raw('year(i12_backupfiles3.lastmodified), month(i12_backupfiles3.lastmodified)'),)
-            ->get();              
-
-    return view('adm.backup.listfiles', compact('dados', 'resumo', 'cliente', 'diretorio' ));
+        $ret->collection=$dataset;
+        $ret->data=$dados;
+        $ret->ok=True;
+  
+      } catch (\Throwable $th) {
+        $ret->msg = $th->getMessage();
+        return $ret->toJson();
+      }
+      return $ret->toJson();
   } 
 
-  //view
-  public function reportalert(Request $request)  {
-
-    $q = isset($request->q) ? $request->q : '';
-
-    $dados = Clientes::select('clientes.codcliente', 'clientes.nome', 'clientes.fantasia', 'clientes.cidade',
-              'clientes.i12controlabkp', 'clientes.pessoa', 'clientes.cpf', 'clientes.cnpj',
-              DB::RAW('max(i12_backupfiles3.lastmodified) as lastmodified'), 
-              DB::RAW('ifnull(max(i12_backupfiles3.size),0) as totalsize'),
-              DB::RAW('count(distinct i12_backupfiles3.id) as qtdearquivos'),
-              DB::RAW('TIMESTAMPDIFF(HOUR, max(i12_backupfiles3.lastmodified), NOW()) as horasatras')
-
+  
+  public function filespormes(Request $request, $diretorio)  {
+    $ret = new RetApiController;
+    try {
+      
+      $dataset = I12BackupfileS3::select(
+                DB::raw('min(i12_backupfiles3.lastmodified) as primeirolastmodified'),
+                DB::raw('sum(i12_backupfiles3.size) as totalsize'),
+                DB::raw('max(i12_backupfiles3.lastmodified) as ultimolastmodified'),
+                DB::raw('count(distinct i12_backupfiles3.md5) as qtdearquivos'),
               )
-              ->leftJoin('i12_backupfiles3', DB::RAW('if(clientes.pessoa="F",concat("000",clientes.cpf),clientes.cnpj)'), '=', 'i12_backupfiles3.cnpj' )
-              ->where('clientes.ativo', '=', 1)
-              ->whereIn('clientes.i12controlabkp', [1,2])
-              ->whereRaw('coalesce(if(clientes.pessoa="F",clientes.cpf,clientes.cnpj),"")<>""')
-              ->when($q, function ($query, $role) {
-                return $query->where(function ($query) use ($role) {
-                  $query->where('clientes.nome', 'like', $role . '%')
-                      ->orWhere('clientes.fantasia', 'like', $role . '%')
-                      ->orWhere('clientes.cidade', 'like', $role . '%');
-                });
-              })
-              ->groupBy('clientes.codcliente')
-              ->havingRaw('(horasatras > ?) or (horasatras is null)', [72])
-              ->orderBy(DB::RAW('if(lastmodified, 1, 0)'))
-              ->orderBy('lastmodified')
-              ->get();
+              ->where('i12_backupfiles3.cnpj', '=', $diretorio)
+              ->orderBy('lastmodified', 'desc')
+              ->groupBy(DB::raw('year(i12_backupfiles3.lastmodified), month(i12_backupfiles3.lastmodified)'),)
+              ->get();     
 
-    return view('adm.backup.alert', compact('dados'));
+      $dados = [];
+      foreach ($dataset as $row) {
+        $linha = [
+          'totalsize' => $row->totalsize,
+          'qtdearquivos' => $row->qtdearquivos,
+          'primeirolastmodified' => $row->primeirolastmodified ? $row->primeirolastmodified->format('Y-m-d H:i:s') : null,
+          'ultimolastmodified' => $row->ultimolastmodified ? $row->ultimolastmodified->format('Y-m-d H:i:s') : null,
+        ];
+        $dados[] = $linha;
+      }                
+
+      $ret->data=$dados;
+      $ret->ok=True;
+  
+    } catch (\Throwable $th) {
+      $ret->msg = $th->getMessage();
+      return $ret->toJson();
+    }
+    return $ret->toJson();
   } 
 
-  //sync
-  public function sync(Request $request, $diretorio)  {
+  public function deletefiles(Request $request)  {
+    $ret = new RetApiController;
+    try{
+      $usuario = session('usuario');
+      if (!$usuario) throw new Exception('Nenhum usuário logado');
 
+      $ids = isset($request->ids) ? $request->ids : null;
+      if (!$ids) throw new Exception('Nenhum registro selecionado');
+      if ($ids ? $ids === '' : false) throw new Exception('Nenhum registro selecionado');
+      $ids = explode(',', $ids);
+      if (count($ids)<=0) throw new Exception('Nenhum registro selecionado');
+
+      $dados = I12BackupfileS3::whereIn('md5', $ids)->orderBy('lastmodified')->get();  
+
+      BackupDeleteJob::dispatch($dados, $usuario);
+
+      $ret->msg=count($dados) . ' arquivo(s) incluidos na fila de exclusão';
+      $ret->ok=True;
+
+    } catch (\Throwable $th) {
+      $ret->msg = $th->getMessage();
+      return $ret->toJson();
+    }
+    return $ret->toJson();    
+  } 
+    
+
+
+  // public function reportalert(Request $request)  {
+  //   $ret = new RetApiController;
+  //   try {
+  //     $perpage = isset($request->perpage) ? $request->perpage : 20;
+  //     $q = isset($request->q) ? $request->q : '';
+
+      
+  //     $dataset = Clientes::select('clientes.*', 
+  //                 DB::RAW('max(i12_backupfiles3.lastmodified) as ultimolastmodified'), 
+  //                 DB::RAW('ifnull(max(i12_backupfiles3.size),0) as totalsize'),
+  //                 DB::RAW('count(distinct i12_backupfiles3.id) as qtdearquivos'),
+  //                 DB::RAW('TIMESTAMPDIFF(HOUR, max(i12_backupfiles3.lastmodified), NOW()) as horasatras')
+  //               )
+  //               ->leftJoin('i12_backupfiles3', DB::RAW('if(clientes.pessoa="F",concat("000",clientes.cpf),clientes.cnpj)'), '=', 'i12_backupfiles3.cnpj' )
+  //               ->where('clientes.ativo', '=', 1)
+  //               ->whereIn('clientes.i12controlabkp', [1,2])
+  //               ->whereRaw('coalesce(if(clientes.pessoa="F",clientes.cpf,clientes.cnpj),"")<>""')
+  //               ->when($q, function ($query, $role) {
+  //                 return $query->where(function ($query) use ($role) {
+  //                   $query->where('clientes.nome', 'like', $role . '%')
+  //                       ->orWhere('clientes.fantasia', 'like', $role . '%')
+  //                       ->orWhere('clientes.cidade', 'like', $role . '%');
+  //                 });
+  //               })
+  //               ->groupBy('clientes.codcliente')
+  //               ->havingRaw('(horasatras > ?) or (horasatras is null)', [72])
+  //               ->orderBy(DB::RAW('if(lastmodified, 1, 0)'))
+  //               ->orderBy('lastmodified')
+  //               ->paginate($perpage);
+
+  //     $dados = [];
+  //     foreach ($dataset as $row) {
+  //       $linha = [
+  //         'cliente' => [
+  //           'id' => $row->codcliente,
+  //           'doc' => $row->pessoa === 'J' ? $row->cnpj : $row->cpf,
+  //           'nome' => $row->nome,
+  //           'controlabkp' => $row->i12controlabkp,
+  //           'fantasia' => $row->fantasia,
+  //           'cidade' => $row->cidade,
+  //           'uf' => $row->uf,
+  //           'ativo' => $row->ativo,
+  //         ],
+  //         'ultimolastmodified' => $row->ultimolastmodified ? $row->ultimolastmodified->format('Y-m-d H:i:s') : null,
+  //         'ultimolastmodifiedhour' => $row->horasatras,
+  //         // 'ultimolastmodifiedhour' => $row->ultimolastmodified ? Carbon::now()->diffInHours($row->ultimolastmodified) : null
+  //         'totalsize' => $row->totalsize,
+  //         'qtdearquivos' => $row->qtdearquivos,
+  //       ];
+  //       $dados[] = $linha;
+  //     }                
+        
+
+  //     $ret->collection=$dataset;
+  //     $ret->data=$dados;
+  //     $ret->ok=True;
+
+  //   } catch (\Throwable $th) {
+  //     $ret->msg = $th->getMessage();
+  //     return $ret->toJson();
+  //   }
+  //   return $ret->toJson();
+  // } 
+
+  public function sync(Request $request, $diretorio)  {
+    $ret = new RetApiController;
     try {
       if ($diretorio<>'') {
-        $ret = $this->clearCNPJBD($diretorio);
-        if (!$ret->ok) {
-          throw new Exception($ret->msg);
+        $retClear = $this->clearCNPJBD($diretorio);
+        if (!$retClear->ok) {
+          throw new Exception($retClear->msg);
         }
       }
 
@@ -363,9 +496,9 @@ class BackupController extends Controller
           
           $size = $disk->size($file);
           if (!$lastmodified) $lastmodified = $disk->lastModified($file);
-          $ret = $this->saveBD($file, $size, $lastmodified, $diretorio, ($s3atual=='s3backup' ? 0 : 1)); 
-          if (!$ret->ok) {
-            throw new Exception($ret->msg);
+          $retSave = $this->saveBD($file, $size, $lastmodified, $diretorio, ($s3atual=='s3backup' ? 0 : 1)); 
+          if (!$retSave->ok) {
+            throw new Exception($retSave->msg);
           }
         }
 
@@ -375,54 +508,61 @@ class BackupController extends Controller
         };        
       }
 
-      return redirect()->back()->with('success', 'Fim do processamento diretório: ' . '/' . $diretorio);
+      
+      $ret->msg='Fim do processamento diretório: ' . '/' . $diretorio;
+      $ret->ok=True;
 
-    } catch (Exception $e) {
-        return redirect()->back()->withErrors($e->getMessage());
-        exit();
+    } catch (\Throwable $th) {
+      $ret->msg = $th->getMessage();
+      return $ret->toJson();
     }
+    return $ret->toJson();    
   }   
  
-  //view
-  public function deletefiles(Request $request)  {
-    try{
-      $ids = isset($request->selecionado) ? $request->selecionado : null;
-      if (!$ids) throw new Exception('Nenhum registro selecionado');
-      $dados = I12BackupfileS3::whereIn('md5', $ids)->orderBy('lastmodified')->get();  
 
-      $usuario = Auth::guard('adm')->user();
-      BackupDeleteJob::dispatch($dados, $usuario);
 
-      return redirect()->back()->with('success', count($dados) . ' arquivo(s) incluidos na fila de exclusão');
-    } catch (Exception $e) {
-        return redirect()->back()->withErrors($e->getMessage());
-    }
-  } 
-    
-
-  //view
   public function download(Request $request, $md5)  {
-
-    try {
+    $ret = new RetApiController;
+    try{
+      $usuario = session('usuario');
+      if (!$usuario) throw new Exception('Nenhum usuário logado');
       
-      $ret = (object) [
-        'ok' => false,
-        'msg' => ''
-      ];
+      $motivo = isset($request->motivo) ? strval($request->motivo) : null;
+      if ($motivo ? Str::length($motivo) <= 2 : false) throw new Exception('Nenhum registro selecionado');
+
       $s3 = I12BackupfileS3::where('md5', $md5)->first();  
       if (!$s3) throw new Exception('Arquivo não foi encontrado');
-      // if (!$s3) throw new Exception('Arquivo não foi encontrado');
+
+      
+
+      try{
+        DB::beginTransaction();
+        
+        $log = new I12BackupfileS3Log();
+        $log->created_at = Carbon::now();
+        $log->md5file = $s3->md5;
+        $log->size = $s3->size;
+        $log->motivo = $motivo;
+        $log->filename = $s3->filename;
+        $log->userid = $usuario->codusuario;
+        $log->ip = \Request::getClientIp(true);
+        $log->save();
+
+        DB::commit();
+      } catch (Exception $e) {
+        DB::rollBack();
+        throw new Exception('Erro ao registrar log - ' . $e->getMessage());
+      }
+
       $url = $s3->urldownload(Carbon::now()->addSeconds(30));
-
-      $usuario = Auth::guard('adm')->user();
       BackupDownloadJob::dispatch($s3, $usuario);
-
-      $ret->ok = true;
-    } catch (Exception $e) {
-        $ret->msg = $e->getMessage();
+      
+      $ret->data=$url;
+      $ret->ok=True;
+    } catch (\Throwable $th) {
+      $ret->msg = $th->getMessage();
+      return $ret->toJson();
     }
-    return view('adm.backup.download', compact('s3', 'ret', 'url'));
-
+    return $ret->toJson();    
   } 
-
 }

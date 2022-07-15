@@ -15,6 +15,7 @@ class I12BackupfileS3 extends Model
       'lastmodified',
       'lastcheck',
       'ultimolastmodified',
+      'primeirolastmodified',
   ];  
 
   public function setfilenameAttribute($value)

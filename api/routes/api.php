@@ -83,11 +83,16 @@ Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'user
     
     Route::get('/', 'BackupController@list');
     Route::get('dash', 'BackupController@dash');
+
+    Route::get('list/{diretorio}/files', 'BackupController@listfile');
+    Route::get('list/{diretorio}/filespormes', 'BackupController@filespormes');
+    Route::post('list/{diretorio}/sync', 'BackupController@sync');
+    
+    Route::delete('delete/files', 'BackupController@deletefiles');
+
+    Route::get('download/{md5}', 'BackupController@download');
+    
     Route::get('report/alert', 'BackupController@reportalert')->name('adm.backup.report.alert');
-    Route::get('list/{diretorio}/files', 'BackupController@listfile')->name('adm.backup.list.files');
-    Route::get('list/{diretorio}/sync', 'BackupController@sync')->name('adm.backup.list.sync');
-    Route::post('delete', 'BackupController@deletefiles')->name('adm.backup.delete');
-    Route::get('download/{md5}', 'BackupController@download')->name('adm.backup.download');
   });
 
 

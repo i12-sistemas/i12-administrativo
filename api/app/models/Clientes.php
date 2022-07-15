@@ -12,7 +12,8 @@ class Clientes extends Model
     protected $primaryKey = 'codcliente';
     public $remember_token = false;
 
-    protected $dates =['i12ultimaatualizacao'];
+    //ultimolastmodified usado no backup
+    protected $dates =['i12ultimaatualizacao', 'ultimolastmodified'];
     
     public function getnomeAttribute($value)
     {

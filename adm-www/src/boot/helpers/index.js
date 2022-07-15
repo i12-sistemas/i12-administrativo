@@ -100,6 +100,19 @@ export default async ({ Vue, store }) => {
         })
       })
     },
+    dialogProgress (app, pMsg = '', pTitle = '') {
+      return app.$q.dialog({
+        title: pTitle,
+        message: pMsg,
+        class: 'bg-grey-4 text-black',
+        progress: {
+          spinner: QSpinnerOval,
+          color: 'black'
+        },
+        persistent: true, // we want the user to not be able to close it
+        ok: false // we want the user to not be able to close it
+      })
+    },
     toBool (val) {
       return (val === true) || (val === 1) || (val === '1') || (val === 'true') || (val === 'True') || (val === 'TRUE')
     },
@@ -938,19 +951,6 @@ export default async ({ Vue, store }) => {
       } while (fileSizeInBytes > 1024)
 
       return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i]
-    },
-    dialogProgress (app, pMsg = '', pTitle = '') {
-      return app.$q.dialog({
-        title: pTitle,
-        message: pMsg,
-        class: 'bg-grey-4 text-black',
-        progress: {
-          spinner: QSpinnerOval,
-          color: 'black'
-        },
-        persistent: true, // we want the user to not be able to close it
-        ok: false // we want the user to not be able to close it
-      })
     },
     validaEmail (email) {
       var reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/

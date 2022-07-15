@@ -13,25 +13,30 @@
               <q-card class="bg-grey-2 text-grey-10" bordered flat>
                 <q-card-section >
                   <div class="row q-gutter-y-lg">
-                    <div class="col-xs-6 col-md-3 text-center">
-                      <div><q-icon name="calculate" size="3em" /></div>
-                      <div class="text-h4 text-weight-bold">{{$helpers.bytesToHumanFileSizeString(rows.total.size)}}</div>
-                      <div class="text-h6">armazenados</div>
+                    <div class="col-xs-12 col-md-3 text-center bg-red-8 rounded-borders" :class="rows.total.emalertaclientes > 0 ? 'text-white' : ''">
+                      <div><q-icon name="sick" size="3em" /></div>
+                      <div class="text-h4 text-weight-bold">{{$helpers.formatRS(rows.total.emalertaclientes,'',0)}}</div>
+                      <div class="text-h6">clientes em alerta</div>
                     </div>
-                    <div class="col-xs-6 col-md-3 text-center">
+                    <div class="col-xs-6 col-md-2 text-center">
+                      <div><q-icon name="people_alt" size="3em" /></div>
+                      <div class="text-h4 text-weight-bold">{{$helpers.formatRS(rows.total.qtdeclientes,'',0)}}</div>
+                      <div class="text-h6">clientes</div>
+                    </div>
+                    <div class="col-xs-6 col-md-2 text-center">
+                      <div><q-icon name="functions" size="3em" /></div>
+                      <div class="text-h4 text-weight-bold">{{$helpers.bytesToHumanFileSizeString(rows.total.mediacliente)}}</div>
+                      <div class="text-h6">por cliente</div>
+                    </div>
+                    <div class="col-xs-6 col-md-2 text-center">
                       <div><q-icon name="text_snippet" size="3em" /></div>
                       <div class="text-h4 text-weight-bold">{{$helpers.formatRS(rows.total.qtde,'',0)}}</div>
                       <div class="text-h6">arquivos</div>
                     </div>
                     <div class="col-xs-6 col-md-3 text-center">
-                      <div><q-icon name="people_alt" size="3em" /></div>
-                      <div class="text-h4 text-weight-bold">{{$helpers.formatRS(rows.total.qtdeclientes,'',0)}}</div>
-                      <div class="text-h6">clientes</div>
-                    </div>
-                    <div class="col-xs-6 col-md-3 text-center">
-                      <div><q-icon name="functions" size="3em" /></div>
-                      <div class="text-h4 text-weight-bold">{{$helpers.bytesToHumanFileSizeString(rows.total.mediacliente)}}</div>
-                      <div class="text-h6">por cliente</div>
+                      <div><q-icon name="calculate" size="3em" /></div>
+                      <div class="text-h4 text-weight-bold">{{$helpers.bytesToHumanFileSizeString(rows.total.size)}}</div>
+                      <div class="text-h6">armazenados</div>
                     </div>
                   </div>
                 </q-card-section>
@@ -108,13 +113,13 @@
               </q-card>
             </div>
             <div class="col-xs-12 col-md-4 ">
-              <q-card class="bg-red-8 text-white full-height" flat>
+              <q-card class="bg-yellow-10 text-white full-height" flat>
                 <q-card-section>
                   <div class="text-h6">Inativos</div>
                   <div class="text-subtitle2">
-                    <q-linear-progress :value="rows.inativos.mediageral/100" rounded color="white" track-color="red-5"  size="20px" class="q-mt-sm" >
+                    <q-linear-progress :value="rows.inativos.mediageral/100" rounded color="white" track-color="yellow-9"  size="20px" class="q-mt-sm" >
                       <div class="absolute-full flex flex-center">
-                      <q-badge color="red-5" text-color="white" :label="rows.inativos.mediageral" />
+                      <q-badge color="yellow-10" text-color="white" :label="rows.inativos.mediageral" />
                       </div>
                     </q-linear-progress>
                   </div>

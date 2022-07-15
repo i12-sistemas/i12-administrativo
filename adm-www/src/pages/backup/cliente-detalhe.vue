@@ -4,34 +4,28 @@
     <div class="full-width header-top-bg bg-primary shadow-up-21"></div>
     <div class="row doc-header " >
       <div class="col-sm-12" :class="$q.platform.is.mobile ? '' : 'q-pa-lg'" >
-        <div class="col-12" v-if="error">
-          <q-banner class="bg-negative text-white">{{error}}</q-banner>
-        </div>
         <q-card class="bg-white " flat bordered  :class="$q.platform.is.mobile ? 'q-ma-sm' : ''">
-          <q-card-section>
+          <q-card-section class="col-12" v-if="error">
+            <q-banner class="bg-negative text-white">{{error}}</q-banner>
+          </q-card-section>
+          <q-card-section v-show="showfilters">
             <div class="row q-col-gutter-sm">
-              <div class="col-md-6 col-xs-12">
-                <q-input outlined debounce="700" v-model="filter" placeholder="Informe qualquer Informação para pesquisar" label="Procurar" clearable :dense="!$q.platform.is.mobile"
-                  hint="Ex.: CNPJ, nome do cliente e etc...">
-                  <template v-slot:prepend>
-                    <q-icon name="search" />
-                  </template>
-                </q-input>
-              </div>
-              <div class="col-xs-12 col-md-3">
-                <q-select v-model="filterstatus" label="Status" outlined emit-value stack-label map-options class="q-mr-xs" :dense="!$q.platform.is.mobile"
-                  :options="[ { value: '2', label: 'Todos' }, { value: '1', label: 'Ativos' }, { value: '0', label: 'Inativo' } ]" />
-              </div>
-              <div class="col-12">
-                <div class="q-gutter-sm">
-                  <q-checkbox v-for="(option, k) in opcoesNivel.options" :key="'nivel' + k" v-model="filternivel"
-                    :val="option.value" :label="option.desc" :color="option.color" />
-                </div>
+              <div class="col-xs-12">
+                <selectbackupmesano outlined :doc="cnpj" v-if="cnpj ? cnpj !== '' : false" v-model="filtermesano" />
               </div>
             </div>
           </q-card-section>
-          <q-card-section>
+          <q-card-section class="q-gutter-x-sm">
             <q-btn unelevated label="Consultar" color="primary" icon="search"  @click="refreshData(null)" :loading="loading"  />
+            <q-btn unelevated :label="$q.platform.is.mobile ? '' : 'Forçar sync'" color="secondary" icon="sync"  @click="actSync" :loading="loading" >
+                <q-tooltip :delay="500">
+                  Essa função faz o sincronismo entre os arquivos em disco com o banco de dados, atualizando as informações de arquivos.
+                </q-tooltip>
+            </q-btn>
+            <q-btn unelevated :label="$q.platform.is.mobile ? '' : 'Remover'" color="red" icon="delete"  @click="actDeleteSelected"
+              :disable="loading || (selected_rows ? selected_rows.length <= 0 : true)" >
+              <q-badge color="yellow" text-color="black" :label="selected_rows.length " floating v-if="(selected_rows ? selected_rows.length > 0 : false)" />
+            </q-btn>
           </q-card-section>
         </q-card>
         <q-card class="bg-white q-mt-md" flat  v-if="rows ? rows.length > 0 : false" :bordered="!$q.platform.is.mobile" :square="$q.platform.is.mobile">
@@ -41,16 +35,16 @@
               <q-table :data="rows" :columns="columns" :dense="!$q.platform.is.mobile"  flat
                 :loading="loading" color="primary" id="sticky-table"
                 :pagination.sync="dataset.pagination"
-                row-key="id"
+                row-key="md5"
+                selection="multiple" :selected.sync="selected_rows"
                  :rows-per-page-options="$qtable.rowsperpageoptions"
                 @request="refreshData"
-                :filter="filter"
                 >
                   <template v-slot:body-cell-action="props">
                     <q-td :props="props">
-                      <q-btn flat round :dense="!$q.platform.is.mobile" :size="$q.platform.is.mobile ? '12px' : '8px'" icon="edit"
-                        :to="{ name: 'backup.cliente.detalhe' }" >
-                        <q-tooltip>Ver backups do cliente</q-tooltip>
+                      <q-btn flat round :dense="!$q.platform.is.mobile" :size="$q.platform.is.mobile ? '12px' : '8px'" icon="file_download"
+                        @click="actDownload(props.row)" >
+                        <q-tooltip>Download do backup</q-tooltip>
                       </q-btn>
                     </q-td>
                   </template>
@@ -84,13 +78,12 @@
                       </q-tooltip>
                     </q-td>
                   </template>
-                  <template v-slot:body-cell-totalsize="props">
+                  <template v-slot:body-cell-size="props">
                     <q-td :props="props" >
                       <div class="cursor-pointer" >
-                        <div class="">{{$helpers.bytesToHumanFileSizeString(props.row.totalsize)}}</div>
+                        <div class="">{{$helpers.bytesToHumanFileSizeString(props.row.size)}}</div>
                         <q-tooltip :delay="700">
-                          <div>{{$helpers.bytesToHumanFileSizeString(props.row.totalsize)}}</div>
-                          <div >{{$helpers.formatRS(props.row.qtdearquivos, '', 0)}} arquivos</div>
+                          <div>{{$helpers.bytesToHumanFileSizeString(props.row.size)}}</div>
                         </q-tooltip>
                       </div>
                     </q-td>
@@ -109,28 +102,44 @@
                       </div>
                     </q-td>
                   </template>
-                  <template v-slot:body-cell-qtdearquivos="props">
+                  <template v-slot:body-cell-downloadcount="props">
                     <q-td :props="props" >
-                      <div class="cursor-pointer" >
-                        <div class="text-caption text-grey-7">{{$helpers.formatRS(props.row.qtdearquivos, '', 0)}}</div>
-                        <q-tooltip :delay="700">
-                          <div>{{$helpers.bytesToHumanFileSizeString(props.row.totalsize)}}</div>
-                          <div >{{$helpers.formatRS(props.row.qtdearquivos, '', 0)}} arquivos</div>
-                        </q-tooltip>
+                      <div v-if="props.row.downloadcount ?props.row.downloadcount > 0  : false">
+                        {{props.row.downloadcount}} x
                       </div>
                     </q-td>
                   </template>
-                  <template v-slot:body-cell-ultimolastmodified="props">
+                  <template v-slot:body-cell-bucket="props">
+                    <q-td :props="props" >
+                      <div class="cursor-pointer" >
+                        <div class="text-caption text-grey-7">{{props.row.bucket === 1 ? 'EUA' : 'BR'}}</div>
+                      </div>
+                    </q-td>
+                  </template>
+                  <template v-slot:body-cell-lastmodified="props">
                     <q-td :props="props" >
                       <div >
-                        <div v-if="props.row.ultimolastmodified">
-                          <div>{{$helpers.datetimeRelativeToday(props.row.ultimolastmodified)}}</div>
+                        <div v-if="props.row.lastmodified">
+                          <div>{{$helpers.datetimeToBR(props.row.lastmodified, false, true)}}</div>
                           <q-tooltip>
-                            <div v-if="props.row.ultimolastmodified">Último backup em {{ $helpers.datetimeToBR(props.row.ultimolastmodified, false, true) }}</div>
+                            <div v-if="props.row.lastmodified">{{ $helpers.datetimeRelativeToday(props.row.lastmodified) }}</div>
                           </q-tooltip>
                         </div>
                       </div>
                     </q-td>
+                  </template>
+                  <template v-slot:bottom-row>
+                    <q-tr>
+                      <q-td></q-td>
+                      <q-td colspan="6" class="text-right">
+                        <div>
+                          <span v-if="(totalbytesselected > 0) && (selected_rows ? selected_rows.length > 0 :false) " class="rounded-borders bg-yellow text-body q-px-xs q-mr-md">
+                            Selecionado: {{$helpers.bytesToHumanFileSizeString(totalbytesselected)}}
+                          </span>
+                          <span class="text-weight-bold">Total: {{$helpers.bytesToHumanFileSizeString(totalbytes)}}</span>
+                        </div>
+                      </q-td>
+                    </q-tr>
                   </template>
               </q-table>
             </div>
@@ -141,7 +150,8 @@
             <q-btn flat dense round @click="$store.dispatch('homedashboard/togglemenu')" aria-label="Menu" icon="menu" />
             <q-btn flat round icon="arrow_back" @click="$router.go(-1)"/>
             <q-separator vertical inset v-if="!$q.platform.is.mobile" spaced/>
-            <q-toolbar-title>Consulta de backup</q-toolbar-title>
+            <q-toolbar-title>Backup - Cliente: {{cnpj}}</q-toolbar-title>
+            <q-btn  :icon="showfilters ? 'filter_alt_off' : 'filter_alt'" :round="$q.platform.is.mobile" flat @click="showfilters = !showfilters" />
             <q-btn  icon="search" :round="$q.platform.is.mobile" flat @click="refreshData(null)" :loading="loading" />
           </q-toolbar>
         </q-page-sticky>
@@ -155,9 +165,11 @@
 <script>
 import { BackupNivel } from 'src/mvc/models/enums/backuptype'
 import Backups from 'src/mvc/collections/backups.js'
+import selectbackupmesano from 'src/components/cnp-select-backupmesano'
 export default {
   name: 'servidores.index',
   components: {
+    selectbackupmesano
   },
   data () {
     var opcoesNivel = new BackupNivel()
@@ -167,16 +179,17 @@ export default {
       opcoesNivel,
       rows: [],
       filternivel: ['8', '1', '2'],
-      filterstatus: '1',
-      filter: '',
+      filtermesano: null,
+      cnpj: '',
+      showfilters: false,
+      selected_rows: [],
       columns: [
         { name: 'action', align: 'left', label: '*', field: 'id' },
-        { name: 'cliente', align: 'left', label: 'Cliente', field: 'cliente', filterconfig: { value: null } },
-        { name: 'cidade', align: 'left', label: 'Cidade', field: 'cidade', filterconfig: { value: null } },
-        { name: 'ultimolastmodified', align: 'center', label: 'Último backup', field: 'ultimolastmodified' },
-        { name: 'controlabkp', align: 'center', label: 'Nível', field: 'controlabkp' },
-        { name: 'qtdearquivos', align: 'right', label: 'Qtde', field: 'qtdearquivos', filterconfig: { value: null } },
-        { name: 'totalsize', align: 'right', label: 'Arquivos', field: 'totalsize', filterconfig: { value: null } }
+        { name: 'name', align: 'left', label: 'Arquivo', field: 'name', filterconfig: { value: null } },
+        { name: 'bucket', align: 'left', label: 'Bucket', field: 'bucket', filterconfig: { value: null } },
+        { name: 'lastmodified', align: 'center', label: 'Data backup', field: 'lastmodified' },
+        { name: 'downloadcount', align: 'center', label: 'Download', field: 'downloadcount', filterconfig: { value: null } },
+        { name: 'size', align: 'right', label: 'Tamanho', field: 'size', filterconfig: { value: null } }
       ],
       loading: false,
       posting: false,
@@ -184,9 +197,42 @@ export default {
     }
   },
   async mounted () {
+
+  },
+  computed: {
+    totalbytes: function () {
+      var app = this
+      if (!app.rows) return 0
+      var total = 0
+      for (let index = 0; index < app.rows.length; index++) {
+        const element = app.rows[index]
+        total = parseInt(total + parseInt(element.size))
+      }
+      return total
+    },
+    totalbytesselected: function () {
+      var app = this
+      if (!app.selected_rows) return 0
+      var total = 0
+      for (let index = 0; index < app.selected_rows.length; index++) {
+        const element = app.selected_rows[index]
+        total = parseInt(total + parseInt(element.size))
+      }
+      return total
+    }
+  },
+  async activated () {
     var app = this
+    var force = (app.cnpj ? app.cnpj === '' : true) || (app.cnpj !== app.$route.params.doc)
+    app.cnpj = app.$route.params.doc
     if (app.$route.query) await app.queryRead(app.$route.query)
-    await app.refreshData(null)
+    if (force) await app.refreshData(null)
+    // called on initial mount
+    // and every time it is re-inserted from the cache
+  },
+  deactivated () {
+    // called when removed from the DOM into the cache
+    // and also when unmounted
   },
 
   methods: {
@@ -194,13 +240,97 @@ export default {
       var app = this
       if (pQuery) {
         if (pQuery.page) app.dataset.pagination.page = parseInt(pQuery.page)
-        if (pQuery.status) {
-          app.filterstatus = pQuery.status
+        if (pQuery.mesano) {
+          app.filtermesano = pQuery.mesano
         }
-        if (pQuery.nivel) {
-          app.filternivel = pQuery.nivel.split(',')
+        // if (pQuery.nivel) {
+        //   app.filternivel = pQuery.nivel.split(',')
+        // }
+        // if (pQuery.find) app.filter = pQuery.find
+      }
+    },
+    async actSync () {
+      var app = this
+      var dialog = app.$helpers.dialogProgress(app, 'Aguarde o processo terminar!', 'Sincronizando...')
+      try {
+        var ret = await app.dataset.syncSend(app.cnpj)
+        if (ret.ok) {
+          app.$q.notify({
+            color: 'positive',
+            icon: 'sync',
+            timeout: 2500,
+            caption: ret.msg,
+            message: 'Sincronismo de backup'
+          })
+          app.refreshData()
+        } else {
+          app.$helpers.showDialog(ret)
         }
-        if (pQuery.find) app.filter = pQuery.find
+      } catch (error) {
+        app.$helpers.showDialog({ ok: false, msg: error.message, warning: true })
+      } finally {
+        dialog.hide()
+      }
+    },
+    async actDownload (row) {
+      var app = this
+      app.$q.dialog({
+        title: 'Download de backup',
+        message: 'Justifique o motivo do download?',
+        prompt: {
+          model: '',
+          isValid: val => val.length > 2, // << here is the magic
+          type: 'text' // optional
+        },
+        cancel: true,
+        persistent: true
+      }).onOk(async justificativa => {
+        if (justificativa ? justificativa.length > 2 : false) {
+          var dialog = app.$helpers.dialogProgress(app, 'Em alguns segundos o download iniciará', 'Preparando download...')
+          try {
+            var ret = await row.download(justificativa)
+            if (ret.ok) {
+              app.$helpers.forceFileDownload(ret.url)
+            } else {
+              app.$helpers.showDialog(ret)
+            }
+          } catch (error) {
+            app.$helpers.showDialog({ ok: false, msg: error.message, warning: true })
+          } finally {
+            dialog.hide()
+          }
+        } else {
+          app.$helpers.showDialog({ ok: false, msg: 'Informe no mínimo 3 e no máximo 100 caracteres' })
+        }
+      })
+    },
+    async actDeleteSelected () {
+      var app = this
+      if (app.selected_rows ? app.selected_rows.length <= 0 : true) return
+      var dialog = app.$helpers.dialogProgress(app, 'Excluido arquivo de backup', 'Aguarde...')
+      try {
+        var dados = []
+        if (app.selected_rows ? app.selected_rows.length > 0 : false) {
+          for (let index = 0; index < app.selected_rows.length; index++) {
+            dados.push(app.selected_rows[index].md5)
+          }
+        }
+        var ret = await app.dataset.deleteSend(dados)
+        if (ret.ok) {
+          app.$q.notify({
+            color: 'positive',
+            icon: 'delete',
+            timeout: 2500,
+            caption: ret.msg,
+            message: 'Arquivos de backup'
+          })
+        } else {
+          app.$helpers.showDialog(ret)
+        }
+      } catch (error) {
+        app.$helpers.showDialog({ ok: false, msg: error.message, warning: true })
+      } finally {
+        dialog.hide()
       }
     },
     async actEditDialog (rowIndex) {
@@ -235,8 +365,7 @@ export default {
         app.error = null
         app.dataset.readPropsTable(props)
         app.dataset.filter = app.filter
-        app.dataset.status = app.filterstatus
-        app.dataset.nivel = app.filternivel
+        app.dataset.mesano = app.filtermesano
 
         app.dataset.orderby = null
         if (app.orderbylist) {
@@ -244,15 +373,16 @@ export default {
           if (c > 0) app.dataset.orderby = app.orderbylist
         }
 
-        var ret = await app.dataset.fetchPorCliente()
+        var ret = await app.dataset.fetchDetalhe(app.cnpj)
         if (ret.ok) {
+          app.selected_rows = []
           app.rows = app.dataset.itens
           // atualiza url
           // if (app.$route.query.t) delete app.$route.query.t
           var query = {}
-          if (app.dataset.filter !== null && app.dataset.filter !== '') query.find = app.dataset.filter
-          if (app.dataset.status !== null) query.status = app.dataset.status
-          if (app.dataset.nivel !== null) query.nivel = app.dataset.nivel.join(',')
+          // if (app.dataset.filter !== null && app.dataset.filter !== '') query.find = app.dataset.filter
+          // if (app.dataset.status !== null) query.status = app.dataset.status
+          if (app.dataset.mesano !== null) query.mesano = app.dataset.mesano
 
           if (app.dataset.pagination.page !== null && app.dataset.pagination.page > 1) query.page = app.dataset.pagination.page
 

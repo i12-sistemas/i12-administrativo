@@ -26,7 +26,7 @@ class BackupDownloadMail extends Mailable
     {
       $info = (object)[
         'dhacao' => Carbon::now(),
-        'ip' => \Request::ip(),
+        'ip' => \Request::getClientIp(true),
       ];
       return $this->subject('INFO - Registro de download de backup - ' . $this->arquivo->shortfilename)
           ->markdown('adm.mail.backupdownloaded')
