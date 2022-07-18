@@ -11,6 +11,7 @@ module.exports = function (ctx) {
     boot: [
       'i18n',
       'config',
+      'addressbar-color',
       'eventbus',
       '/helpers',
       'pusher',
@@ -91,7 +92,8 @@ module.exports = function (ctx) {
         'Notify',
         'Dialog',
         'BottomSheet',
-        'Meta'
+        'Meta',
+        'AddressbarColor'
       ]
     },
 

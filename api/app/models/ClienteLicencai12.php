@@ -12,7 +12,7 @@ class ClienteLicencai12 extends Model
   protected $primaryKey = 'id';
   public $remember_token = false;
 
-  protected $dates =['dhemissao', 'dhcad', 'dhalt', 'dhativadaonline'];
+  protected $dates =['dhemissao', 'dhcad', 'dhalt', 'dhativadaonline', 'datavencimento', 'databloqueiototal'];
 
   public function getnumeroAttribute($value)
   {
@@ -64,6 +64,29 @@ class ClienteLicencai12 extends Model
   {
       $agora = Carbon::now();
       $d = ($this->datavencimento < $agora) || ($this->atual != 1);
+      return $d;
+  }  
+
+    public function getstatusAttribute($value)
+  {
+      if($this->bloqueado) {
+        return 'Bloqueado';
+      } else {
+        if($this->expirado) {
+          return 'Expirado';
+        } else  {
+          return 'Ok';
+        }
+      }
+      $d = ($this->datavencimento < $agora) || ($this->atual != 1);
+      return $d;
+  }  
+    public function getdiasrestantesAttribute($value)
+  {
+      $d = 0;
+      if(!$this->bloqueado) {
+        $d = $this->databloqueiototal->diffInDays(Carbon::now());
+      }
       return $d;
   }  
 

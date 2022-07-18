@@ -4,21 +4,21 @@ const routes = [
     component: () => import('layouts/lytlogin.vue'),
     children: [
       { path: '/', name: 'login.usuario', meta: { authempresa1: true }, component: () => import('pages/login/login-user.vue') },
-      { path: 'google/callback', name: 'login.usuario2', meta: { authempresa1: true }, component: () => import('pages/login/login-user.vue') },
+      // { path: 'google/callback', name: 'login.usuario2', meta: { authempresa1: true }, component: () => import('pages/login/login-user.vue') },
       { path: '/resetpwd/request', name: 'login.resetpwd.request', meta: { authempresa1: true }, component: () => import('pages/login/resetpwd-request.vue') },
       { path: '/resetpwd/change', name: 'login.resetpwd.change', meta: { authempresa1: true }, component: () => import('pages/login/resetpwd-codecheck.vue') },
       { path: 'usuario/logout', name: 'logout.usuario', component: () => import('pages/login/logoff-user.vue') }
     ]
   },
-  {
-    path: '/p',
-    component: () => import('layouts/lytpublico.vue'),
-    children: [
-      { path: 'notas/empresa/xmlpendente', name: 'publico.coletas.xmlpendente', component: () => import('pages/publico/coletas/xmlpendente.vue') },
-      { path: 'rastreabilidade', name: 'publico.carga.rastreabilidade', component: () => import('pages/publico/carga/rastreabilidade.vue') },
-      { path: 'palete', name: 'publico.palete.consulta', component: () => import('pages/publico/palete/consulta.vue') }
-    ]
-  },
+  // {
+  //   path: '/p',
+  //   component: () => import('layouts/lytpublico.vue'),
+  //   children: [
+  //     { path: 'notas/empresa/xmlpendente', name: 'publico.coletas.xmlpendente', component: () => import('pages/publico/coletas/xmlpendente.vue') },
+  //     { path: 'rastreabilidade', name: 'publico.carga.rastreabilidade', component: () => import('pages/publico/carga/rastreabilidade.vue') },
+  //     { path: 'palete', name: 'publico.palete.consulta', component: () => import('pages/publico/palete/consulta.vue') }
+  //   ]
+  // },
   {
     path: '/',
     component: () => import('layouts/lytdefault.vue'),
@@ -28,13 +28,14 @@ const routes = [
       { name: 'tabelaibpt', path: '/tabelaibpt', component: () => import('pages/tabelaibpt/index.vue'), meta: { permissao: 'tabelaibpt.index' } },
       { name: 'tabelaibpt.log', path: '/tabelaibpt/log', component: () => import('pages/tabelaibpt/log-download.vue'), meta: { permissao: 'tabelaibpt.index' } },
 
+      { name: 'clientes.licenca', path: '/clientes/licenca', props: true, component: () => import('pages/cliente/licenca/listagem.vue') },
+
       { name: 'servidores', path: '/servidores', component: () => import('pages/servidores/index.vue'), meta: { permissao: 'servidores.index' } },
       { name: 'backup', path: '/backup', component: () => import('pages/backup/index.vue'), meta: { permissao: 'backup.index' } },
       { name: 'backup.listagem', path: '/backup/listagem', component: () => import('pages/backup/listagem.vue'), meta: { permissao: 'backup.listagem' } },
       { name: 'backup.cliente.detalhe', path: '/backup/cliente/:doc', component: () => import('pages/backup/cliente-detalhe.vue'), meta: { permissao: 'backup.cliente.detalhe' } }
       // { name: 'coletas.consulta', path: '/coletas', props: true, component: () => import('pages/operacional/coletas/consulta.vue') },
 
-      // { name: 'rastrear', path: '/entregas/rastrear/:chave', props: true, component: () => import('pages/operacional/carga/rastrear.vue') },
       // { name: 'entregas.consulta', path: '/entregas', props: true, component: () => import('pages/operacional/coletasnotas/consulta.vue') },
       // { name: 'entregas.consulta.rapida', path: '/', props: true, component: () => import('pages/operacional/carga/rastrear-consulta.vue') },
 
@@ -57,7 +58,7 @@ const routes = [
     component: () => import('layouts/lytdefault-notoolbar.vue'),
     meta: { authusuario: true },
     children: [
-      { name: 'operacional.coletas.coletas.print', path: 'operacional/coletas/print', component: () => import('pages/operacional/coletas/printshow.vue') }
+      // { name: 'operacional.coletas.coletas.print', path: 'operacional/coletas/print', component: () => import('pages/operacional/coletas/printshow.vue') }
     ]
   }
 ]

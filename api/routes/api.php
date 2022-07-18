@@ -77,6 +77,14 @@ Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'user
     Route::get('/', 'i12DatabasesController@index');
   });
 
+  Route::group(['prefix' => 'clientes'], function () {
+    
+    Route::group(['prefix' => 'licencas'], function () {
+      Route::get('/', 'ClientesController@licencas');
+      Route::post('/gerar', 'ClientesController@gerar');
+    });
+  });
+
 
   Route::group(['prefix' => 'backup'], function () {
     // Route::get('/', 'i12DatabasesController@index');

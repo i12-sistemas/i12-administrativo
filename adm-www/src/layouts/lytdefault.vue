@@ -19,26 +19,11 @@
             >
             <q-card class="q-ma-sm bg-white" bordered style="max-width: 280px"  >
               <q-card-section >
-                <div class="" v-if="usuariologado.celular !== ''"><q-icon name="phone" /> {{usuariologado.celular}}</div>
+                <div class="" v-if="usuariologado.celular ? usuariologado.celular !== '' : false"><q-icon name="phone" /> {{usuariologado.celular}}</div>
                 <div class="" v-if="usuariologado.email !== ''"><q-icon name="mail" /> {{usuariologado.email}}</div>
               </q-card-section>
               <q-separator   />
-              <q-card-section >
-                <div class="text-caption text-weight-bold">Empresas associadas</div>
-                <div class="ellipsis text-left" v-if="usuariologado.clientescount > 0">
-                  <div class="ellipsis text-caption" v-for="(cli, k) in usuariologado.clientes" :key="'cli' + k">
-                    {{ cli.cnpj ? $helpers.mascaraDocCPFCNPJ(cli.cnpj) + ' :: ': ''}}
-                    {{cli.razaosocial !== '' ? cli.razaosocial : cli.fantasia }}
-                    <q-tooltip :delay="500">
-                      {{ cli.cnpj ? $helpers.mascaraDocCPFCNPJ(cli.cnpj) + ' :: ': ''}} {{cli.razaosocial !== '' ? cli.razaosocial : cli.fantasia }}
-                    </q-tooltip>
-                  </div>
-                </div>
-                <div class="text-weight-bold" v-if="usuariologado.clientescount <= 0">Nenhuma empresa identificada</div>
-              </q-card-section>
-              <q-separator />
               <q-card-section class="q-pa-none">
-                <q-btn label="Meu perfil" :to="({name: 'usuario.meuperfil'})" v-close-popup unelevated icon="fa fa-user-circle" class="full-width" />
                 <q-btn label="Sair" :to="({name: 'logout.usuario'})" v-close-popup unelevated icon="power_settings_new" class="full-width" />
               </q-card-section>
             </q-card>
@@ -51,6 +36,18 @@
             <q-item-section class="text-weight-bold">OPERACIONAL</q-item-section>
           </q-item>
           <!-- <q-item clickable  v-ripple :to="{ name: 'home' }" v-if="(usuariologado ? usuariologado.permitestatusgeral : false)" > -->
+          <q-item clickable  v-ripple :to="{ name: 'backup' }" v-if="(usuariologado)" >
+            <q-item-section avatar>
+              <q-icon name="cloud_sync" />
+            </q-item-section>
+            <q-item-section>Backup</q-item-section>
+          </q-item>
+          <q-item clickable  v-ripple :to="{ name: 'backup.listagem' }" v-if="(usuariologado)" >
+            <q-item-section avatar>
+              <q-icon name="cloud_sync" />
+            </q-item-section>
+            <q-item-section>Backup listagem</q-item-section>
+          </q-item>
           <q-item clickable v-ripple :to="{ name: 'tabelaibpt' }" v-if="(usuariologado)" >
             <q-item-section avatar>
               <q-icon name="money" />
@@ -62,6 +59,12 @@
               <q-icon name="dns" />
             </q-item-section>
             <q-item-section>Servidores</q-item-section>
+          </q-item>
+          <q-item clickable  v-ripple :to="{ name: 'clientes.licenca' }" v-if="(usuariologado)" >
+            <q-item-section avatar>
+              <q-icon name="pin" />
+            </q-item-section>
+            <q-item-section>Licenças</q-item-section>
           </q-item>
           <q-item clickable  v-ripple :to="{ name: 'tabelaibpt' }" v-if="(usuariologado)" >
             <q-item-section avatar>
@@ -87,18 +90,6 @@
             </q-item-section>
             <q-item-section>Erros</q-item-section>
           </q-item>
-          <q-item clickable  v-ripple :to="{ name: 'backup' }" v-if="(usuariologado)" >
-            <q-item-section avatar>
-              <q-icon name="cloud_sync" />
-            </q-item-section>
-            <q-item-section>Backup</q-item-section>
-          </q-item>
-          <q-item clickable  v-ripple :to="{ name: 'backup.listagem' }" v-if="(usuariologado)" >
-            <q-item-section avatar>
-              <q-icon name="cloud_sync" />
-            </q-item-section>
-            <q-item-section>Backup listagem</q-item-section>
-          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -113,8 +104,8 @@
       </transition>
     </q-page-container>
 
-    <q-footer class="bg-grey-2" >
-      <div class="q-mt-md text-grey-8 text-caption q-pa-xs text-center">
+    <q-footer :class="$q.platform.is.mobile ? 'bg-primary text-grey-1' : 'bg-grey-2 text-grey-8'"  bordered v-if="$route.name === 'home'">
+      <div class="q-mt-md  text-caption q-pa-xs text-center">
         <div><span class="text-weight-bold">{{appPackage.productName}} :: {{appPackage.description}}</span> | Versão {{appPackage.version}} release {{$helpers.datetimeToBR(appPackage.releasedatetime)}}</div>
         <div>© Copyright {{year ? year : ''}} :: <a href="https://www.i12.com.br" target="_blank">i12.com.br</a></div>
       </div>
@@ -123,7 +114,6 @@
 </template>
 
 <script>
-
 import datapackage from '../../package.json'
 import moment from 'moment'
 
@@ -162,6 +152,7 @@ export default {
   },
   async mounted () {
     var app = this
+    this.$q.addressbarColor.set('#a2e3fa')
     app.optionsmenu = this.$store.state.homedashboard.options
     app.permitefollowupconsulta = app.$helpers.permite('followup.consulta')
     app.year = moment().year()

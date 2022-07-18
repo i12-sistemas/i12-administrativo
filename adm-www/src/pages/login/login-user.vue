@@ -68,7 +68,7 @@ export default {
       if (app.redirect) {
         await app.$router.push({ path: app.redirect })
       } else {
-        await app.$router.push({ name: 'entregas.consulta.rapida' })
+        await app.$router.push({ name: 'home' })
       }
     },
     async closeApp () {

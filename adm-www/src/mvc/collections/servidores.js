@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import { Screen } from 'quasar'
 import Servidor from 'src/mvc/models/servidor.js'
-import dialogfiltermultigeral from 'src/pages/operacional/coletas/filters/cpn-filter-multivalue'
 
 class Servidores {
   constructor () {
@@ -199,21 +198,6 @@ class Servidores {
       return Vue.prototype.$helpers.errorReturn(error)
     })
     return ret
-  }
-
-  async ShowDialogFilterMultiGeral (app, config) {
-    return new Promise((resolve) => {
-      app.$q.dialog({
-        parent: app,
-        component: dialogfiltermultigeral,
-        config: config,
-        cancel: true
-      }).onOk(async retOk => {
-        resolve({ ok: true, dados: retOk })
-      }).onCancel(() => {
-        resolve(null)
-      })
-    })
   }
 }
 export default Servidores

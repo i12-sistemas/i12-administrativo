@@ -13,7 +13,8 @@ class Clientes extends Model
     public $remember_token = false;
 
     //ultimolastmodified usado no backup
-    protected $dates =['i12ultimaatualizacao', 'ultimolastmodified'];
+
+    protected $dates =['i12ultimaatualizacao', 'ultimolastmodified', 'saldovencidodesde'];
     
     public function getnomeAttribute($value)
     {
@@ -50,15 +51,15 @@ class Clientes extends Model
     }   
 
     public function ultimo_backup() {
-        return $this->hasOne('App\models\i12clibackuplog','cnpj', 'cnpj')->where('statuslocal',1)->orderby('dhlocal', 'desc');
+        return $this->hasOne(i12clibackuplog::class,'cnpj', 'cnpj')->where('statuslocal',1)->orderby('dhlocal', 'desc');
     } 
     
     public function licencaatual() {
-      return $this->hasOne('App\models\ClienteLicencai12','idcliente', 'codcliente')->where('atual',1);
+      return $this->hasOne(ClienteLicencai12::class,'idcliente', 'codcliente')->where('atual',1);
     }
 
     public function faturasemaberto() {
-      return $this->hasOne('App\models\Faturamento','codcliente', 'codcliente')->where('pago', '=', 'N');
+      return $this->hasOne(Faturamento::class, 'codcliente')->where('pago', '=', 'N');
     }
 
     public function cli_log_erros() {
