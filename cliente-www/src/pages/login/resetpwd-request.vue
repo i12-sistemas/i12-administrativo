@@ -79,7 +79,7 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      username: 'weber@i12.com.br',
+      username: '',
       solicitado: false,
       recaptchaloading: true,
       recaptchatoken: null,

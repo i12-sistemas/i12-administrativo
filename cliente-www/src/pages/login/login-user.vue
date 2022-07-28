@@ -37,7 +37,7 @@
               />
           </q-card-actions>
           <q-card-actions align="center" class="row justify-between q-px-md content-start">
-            <q-btn flat  label="Novo usuário" :loading="sending" @click="actRequest" color="primary" no-caps />
+            <q-btn flat  label="Novo usuário" :loading="sending" @click="actRequest" color="primary" no-caps v-if="false" />
             <q-btn flat  label="Esqueci minha senha" :loading="sending" :to="{ name: 'login.resetpwd.request' }" color="primary" no-caps />
           </q-card-actions>
           <q-card-section class="text-caption text-center">
