@@ -91,7 +91,6 @@ export default {
   methods: {
     async redirectNow () {
       var app = this
-      console.log('redirectNow', app.redirect)
       if (app.redirect) {
         await app.$router.push({ path: app.redirect })
       } else {

@@ -18,6 +18,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 
+
+
 class InteracaoAddClienteJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;

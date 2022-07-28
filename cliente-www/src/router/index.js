@@ -44,7 +44,6 @@ export default function (/* { store, ssrContext } */) {
       }
     }
     if (to.matched.some(record => record.meta.permissao === 'operador')) {
-      console.log()
       // var idpermissao = ''
       // for (let index = 0; index < to.matched.length; index++) {
       //   const element = to.matched[index]

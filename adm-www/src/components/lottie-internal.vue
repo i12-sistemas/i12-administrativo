@@ -23,9 +23,7 @@ export default {
   }
   // watch: {
   //   arquivo: function (val) {
-  //     console.log(val)
   //     this.json = require('src/assets/lotties/' + val + '.json')
-  //     console.log(this.json)
   //   }
   // }
 }

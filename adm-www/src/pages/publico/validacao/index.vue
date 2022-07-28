@@ -212,7 +212,6 @@ export default {
         if (!app.allowConsulta) throw new Error('Dados inválidos')
 
         app.retcheck = await app.sendvalidacao()
-        console.log(app.retcheck)
         if (app.retcheck.ok) {
         } else {
           app.$q.notify({

@@ -15,6 +15,7 @@ use Illuminate\Queue\Events\JobProcessing;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 use App\Jobs\painelcliente\InteracaoAddClienteJob;
 
@@ -27,22 +28,28 @@ class AppServiceProvider extends ServiceProvider
       });
 
       Queue::after(function (JobProcessed $event) {
-        \Log::debug("JobProcessed");
-        $payload = json_decode($event->job->getRawBody());
-        $obj = unserialize($payload->data->command);
-        $interacao = $obj->interacao;
-        try{
-          DB::beginTransaction();
-          $interacao->emaillist = $obj->email;
-          $interacao->emailstatus = 1;
-          $interacao->emailerror = '';
-          $interacao->emaildhprocessado = Carbon::now();
-          $interacao->save();
-          DB::commit();
-        } catch (Exception $e) {
-          DB::rollBack();
+        try {
+          $payload = json_decode($event->job->getRawBody());
+          $commandName = Str::lower($payload->data->commandName);
+          if ($commandName === Str::lower('App\Jobs\painelcliente\InteracaoAddClienteJob ')) {
+            $obj = unserialize($payload->data->command);
+            $interacao = $obj->interacao;
+            try{
+              DB::beginTransaction();
+              $interacao->emaillist = $obj->email;
+              $interacao->emailstatus = 1;
+              $interacao->emailerror = '';
+              $interacao->emaildhprocessado = Carbon::now();
+              $interacao->save();
+              DB::commit();
+            } catch (Exception $e) {
+              DB::rollBack();
+              \Log::error('JobProcessed InteracaoAddClienteJob: ' . $e->getMessage());
+            }          
+          }
+        } catch (\Throwable $th) {
           \Log::error('JobProcessed: ' . $e->getMessage());
-        }          
+        }
       });
             
     }

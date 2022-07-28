@@ -277,8 +277,6 @@ class AtendimentoController extends Controller
         'razaosocial' => $cliente->nome,
         'doc' => $cliente->doc,
       ];
-      \Log::debug($contatoUpdate);
-      \Log::debug($dados);
       $ret->id =  $contatoUpdate->id;
       $ret->ok = true;
       $ret->data = $dados;

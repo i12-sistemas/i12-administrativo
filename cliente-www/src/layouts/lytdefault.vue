@@ -281,7 +281,6 @@ export default {
       var app = this
       if (app.usuariodashloading) return
       app.usuariodashloading = true
-      console.log('iniciado')
       await app.$store.dispatch('usuario/refreshDashboard', ShowNotification)
     },
     async onusuariodash_updated () {
