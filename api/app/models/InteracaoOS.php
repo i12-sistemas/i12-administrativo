@@ -12,7 +12,7 @@ class InteracaoOS extends Model
 
 
     public function interacao() {
-        return $this->hasOne('App\models\Interacao','id', 'idinteracao');
+        return $this->hasOne(Interacao::class, 'id', 'idinteracao');
     }   
     
     

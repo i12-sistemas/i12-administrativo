@@ -10,6 +10,16 @@ class OSFases extends Model
     protected $table = 'osfases';
     protected $primaryKey = 'id';
     public $remember_token = false;
+
+    public function exportCliente()
+    {
+        return [
+          'id' => $this->id,
+          'descricaocliente' => $this->descricaocliente,
+          'classificacao' => $this->classificacao,
+          'pendentecliente' => $this->pendentecliente
+        ];
+    }    
     
     public function getdescricaoAttribute($value)
     {

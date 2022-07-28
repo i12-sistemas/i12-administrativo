@@ -15,6 +15,22 @@ class InteracaoAnexo extends Model
     protected $hidden = [
         'anexo'
     ];    
+
+    public function exportCliente()
+    {
+      $dados =  [
+        'descricao' => $this->descricao,
+        'url' => url('/painelcliente/arquivos/') . '/'.  $this->anexomd5,
+        'md5' => $this->anexomd5,
+        'ext' => $this->anexoext,
+        'size' => $this->anexosize,
+        'dhcad' => $this->dhcad->format('Y-m-d H:i:s'),
+      ];
+      return $dados;
+    }        
+
+
+    
     public function getdescricaoAttribute($value)
     {
         return utf8_encode($value);

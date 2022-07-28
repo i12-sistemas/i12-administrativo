@@ -1,5 +1,10 @@
 import Vue from 'vue'
-import Usuario from 'src/mvc/models/usuario.js'
+import Contato from 'src/mvc/models/contato.js'
+import Cliente from 'src/mvc/models/cliente.js'
+
+export const setip = async (state, dados) => {
+  state.ip = dados
+}
 
 export const setret = async (state, ret) => {
   state.ret = ret
@@ -14,95 +19,87 @@ export const reseterror401 = async (state) => {
 
 export const setusuariologado = async (state, dados) => {
   try {
-    state.usernametype = dados.usernametype
-    state.accesscode = dados.accesscode
-    state.token = dados.usertoken
-    state.expireat = dados.usertokenexpire_at
-    var lUser = new Usuario(dados.user)
-    var lUserObj = JSON.parse(JSON.stringify(lUser))
-    state.user = lUserObj
+    var lUser = new Contato(dados.contato)
+    var lCliente = new Cliente(dados.cliente)
+    // var lUserObj = JSON.parse(JSON.stringify(lUser))
+    state.usuario = lUser
+    state.cliente = lCliente
     state.logado = true
-    localStorage.setItem('usernametype', dados.usernametype)
-    localStorage.setItem('user_token', dados.usertoken)
-    localStorage.setItem('user_tokenexpire_at', dados.usertokenexpire_at)
-
     var instance = Vue.prototype.$axios
     instance.defaults.headers.common['x-auth-token'] = state.token
     instance.defaults.headers.common['x-auth-accesscode'] = state.accesscode
-    instance.defaults.headers.common['x-auth-uuid'] = state.uuid
-    instance.defaults.headers.common['x-auth-username'] = state.user.username
-    instance.defaults.headers.common['x-auth-usernametype'] = state.usernametype
+    instance.defaults.headers.common['x-auth-username'] = state.username
   } catch (error) {
     console.error(error)
   }
 }
 
+export const refreshUserLogado = async (state, usuario) => {
+  state.usuario = usuario
+}
+
 export const setlocalstorage = async (state, dados) => {
   try {
-    localStorage.setItem('user_token', dados.usertoken)
-    localStorage.setItem('user_tokenexpire_at', dados.usertokenexpire_at)
-    localStorage.setItem('user', JSON.stringify(dados.user))
-    state.usernametype = dados.usernametype
-    state.token = dados.usertoken
-    state.expireat = dados.usertokenexpire_at
-    state.userlocal = dados.user
+    state.cliente = null
+    state.clientes = null
+    state.accesscode = null
+    state.logado = false
+    state.token = dados.token
+    state.expireat = dados.expire_at
+    state.username = dados.username
+    state.usuario = null
+
+    if (dados.cliente) {
+      state.cliente = dados.cliente
+      sessionStorage.setItem('user_cliente', JSON.stringify(state.cliente))
+    }
+    if (dados.clientes) {
+      state.clientes = dados.clientes
+      sessionStorage.setItem('user_clientes', JSON.stringify(state.clientes))
+    }
+    if (dados.accesscode) {
+      state.accesscode = dados.accesscode
+      sessionStorage.setItem('user_accesscode', state.accesscode)
+    }
+    sessionStorage.setItem('user_token', state.token)
+    sessionStorage.setItem('user_tokenexpire_at', state.expireat)
+    sessionStorage.setItem('user_username', state.username)
   } catch (error) {
     console.error(error)
   }
 }
 
 export const getlocalstorage = (state) => {
-  var clearall = false
-  state.token = localStorage.getItem('user_token') ? localStorage.getItem('user_token') : null
-  state.expireat = localStorage.getItem('user_tokenexpire_at') ? localStorage.getItem('user_tokenexpire_at') : null
-  state.userlocal = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
-  state.uuid = localStorage.getItem('uuid') ? localStorage.getItem('uuid') : null
-  if (state.uuid === '') state.uuid = null
-  if (!state.uuid) {
-    state.uuid = Vue.prototype.$helpers.generateUUID()
-    localStorage.setItem('uuid', state.uuid)
-  }
-  if ((!state.token) || (!state.expireat)) clearall = true
-  if ((state.userlocal)) {
-    if (!state.userlocal.hashid) clearall = true
-    if (!state.userlocal.username) clearall = true
-  } else {
-    clearall = true
-  }
-  if (clearall) {
-    state.token = null
-    state.userlocal = null
-    state.expireat = null
-    if (localStorage.getItem('usernametype')) localStorage.removeItem('usernametype')
-    if (localStorage.getItem('user_token')) localStorage.removeItem('user_token')
-    if (localStorage.getItem('user_tokenexpire_at')) localStorage.removeItem('user_tokenexpire_at')
-    if (localStorage.getItem('user')) localStorage.removeItem('user')
-  }
+  state.accesscode = sessionStorage.getItem('user_accesscode') ? sessionStorage.getItem('user_accesscode') : null
+  state.token = sessionStorage.getItem('user_token') ? sessionStorage.getItem('user_token') : null
+  state.expireat = sessionStorage.getItem('user_tokenexpire_at') ? sessionStorage.getItem('user_tokenexpire_at') : null
+  state.username = sessionStorage.getItem('user_username') ? sessionStorage.getItem('user_username') : null
+  state.clientes = sessionStorage.getItem('user_clientes') ? JSON.parse(sessionStorage.getItem('user_clientes')) : null
+  state.cliente = sessionStorage.getItem('user_cliente') ? JSON.parse(sessionStorage.getItem('user_cliente')) : null
 }
 
 export const logout = (state) => {
-  state.usernametype = null
-  state.accesscode = null
   state.token = null
+  state.accesscode = null
   state.expireat = null
-  state.userlocal = null
-  state.user = null
+  state.clientes = null
+  state.cliente = null
+  state.username = null
+  state.usuario = null
   state.ret = null
   state.logado = false
-  if (localStorage.getItem('usernametype')) localStorage.removeItem('usernametype')
-  if (localStorage.getItem('user_token')) localStorage.removeItem('user_token')
-  if (localStorage.getItem('user_tokenexpire_at')) localStorage.removeItem('user_tokenexpire_at')
-  if (localStorage.getItem('user')) localStorage.removeItem('user')
+  if (sessionStorage.getItem('user_cliente')) sessionStorage.removeItem('user_cliente')
+  if (sessionStorage.getItem('user_clientes')) sessionStorage.removeItem('user_clientes')
+  if (sessionStorage.getItem('user_accesscode')) sessionStorage.removeItem('user_accesscode')
+  if (sessionStorage.getItem('user_username')) sessionStorage.removeItem('user_username')
+  if (sessionStorage.getItem('user_token')) sessionStorage.removeItem('user_token')
+  if (sessionStorage.getItem('user_tokenexpire_at')) sessionStorage.removeItem('user_tokenexpire_at')
+
   var instance = Vue.prototype.$axios
   instance.defaults.headers.common['x-auth-token'] = null
   instance.defaults.headers.common['x-auth-accesscode'] = null
-  instance.defaults.headers.common['x-auth-uuid'] = null
   instance.defaults.headers.common['x-auth-username'] = null
-  instance.defaults.headers.common['x-auth-usernametype'] = null
-
   delete instance.defaults.headers.common['x-auth-token']
   delete instance.defaults.headers.common['x-auth-accesscode']
-  delete instance.defaults.headers.common['x-auth-uuid']
   delete instance.defaults.headers.common['x-auth-username']
-  delete instance.defaults.headers.common['x-auth-usernametype']
 }

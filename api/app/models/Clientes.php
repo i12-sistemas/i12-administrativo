@@ -40,9 +40,9 @@ class Clientes extends Model
         return utf8_encode($value);
     }   
     
-    public function getdoc14charAttribute($value)
+    public function getdocAttribute($value)
     {
-        return ($this->pessoa=='J' ? $this->cnpj : $this->cpf);
+        return ($this->pessoa === 'J' ? $this->cnpj : $this->cpf);
     }   
 
     public function setemailAttribute($value)

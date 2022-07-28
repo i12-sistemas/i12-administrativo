@@ -59,6 +59,7 @@ class ValidarMeioComunicacaoController extends Controller
    
       $chave = $request->has('email') ? $request->email : $request->whatsapp;
       $force = $request->has('force') ? boolval($request->force) : false;
+      $sendlink = $request->has('sendlink') ? boolval($request->sendlink) : false;
 
       
       if (!$force) {
@@ -97,6 +98,7 @@ class ValidarMeioComunicacaoController extends Controller
         $novo->chave = $chave;
         $novo->cnpj = $empresa->cnpj;
 
+        if ($request->has('sendlink')) $novo->sendlink = $sendlink;
         if ($request->has('from')) $novo->from = $request->from;
         if ($request->has('subject')) $novo->subject = $request->subject;
         if ($request->has('message')) $novo->message = $request->message;
@@ -140,15 +142,16 @@ class ValidarMeioComunicacaoController extends Controller
   public function validar(Request $request)  {
     $ret = new RetApiController;
     try {
-      // $empresa= session('empresa');
-      // if (!$empresa) throw new Exception('Nenhuma empresa informada');
+      $sendlink = $request->has('sendlink') ? boolval($request->sendlink) : false;
 
       $rules = [
         'email' => ['email'],
         'whatsapp' => ['string', 'min:8', 'max:13'],
         'token' => ['string', 'min:1', 'max:255', 'required'],
-        'code' => ['string', 'min:1', 'max:255', 'required'],
+        // 'code' => ['string', 'min:1', 'max:255', 'required'],
+        
       ];
+      if ($sendlink) $rules[] = [ recaptchaFieldName() => recaptchaRuleName() ];
       $messages = [
           'email' => 'E-mail inválido',
           'size' => 'O campo :attribute, deverá ter :max caracteres.',
@@ -157,6 +160,10 @@ class ValidarMeioComunicacaoController extends Controller
           'required' => 'O conteudo do campo :attribute é obrigatório.',
           'max' => 'O conteudo do campo :attribute é deve ser menor do que :max caracteres',
           'min' => 'O conteudo do campo :attribute é deve ser maior do que :min caracteres',
+          recaptchaFieldName() => 'Validação humana falhou',
+          'recaptcha' => 'Validação humana falhou',
+          'validation.recaptcha' => 'Validação humana falhou',
+          'g-recaptcha-response' => 'Validação humana falhou',
       ];    
       $validator = Validator::make($request->all(), $rules, $messages);
       if ($validator->fails()) {
@@ -169,6 +176,13 @@ class ValidarMeioComunicacaoController extends Controller
           throw new Exception(join("; ", $msgs));
       }        
       
+      
+      $code = $request->has('code') ? trim($request->code) : null;
+      if ($code === '') $code = null;
+      if ((!$sendlink) && ($code ? $code === '' : true)) 
+        throw new Exception('Nenhum código informado');      
+
+
       if ($request->has('email') && $request->has('whatsapp')) 
         throw new Exception('Informe somente um método de validação E-mail ou WhatsApp');
 
@@ -219,7 +233,7 @@ class ValidarMeioComunicacaoController extends Controller
       }
       $ret->data = $data;
       $ret->id = $check->id;
-      $ret->msg=$chave . ' verificada com sucesso!';
+      $ret->msg='Chave verificada com sucesso!';
       $ret->ok=True;
 
       // $job = new ValidacaoMeioComunicacaoJob($novo);

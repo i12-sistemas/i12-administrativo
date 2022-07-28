@@ -81,7 +81,7 @@ class HomeController extends Controller
             DB::beginTransaction();
 
             $msg  = new Contatosite;
-            $msg->ip = $request->ip();
+            $msg->ip = \Request::getClientIp(true);
             $msg->dh = Carbon::now();
             $msg->nome = $nome;
             $msg->email = $email;

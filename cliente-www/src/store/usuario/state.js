@@ -1,14 +1,16 @@
 export default function () {
   return {
     logado: false,
-    user: null,
-    usernametype: null,
-    accesscode: null,
-    // dados locais
-    userlocal: null,
+
     token: null,
+    accesscode: null,
     expireat: null,
-    uuid: null,
+    username: null,
+    clientes: null,
+    cliente: null,
+
+    ip: null,
+    usuario: null,
     ret: null,
     axioserror401count: 0
   }

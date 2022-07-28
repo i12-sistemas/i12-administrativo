@@ -14,9 +14,11 @@ class ValidacaoMeioComunicacaoMail extends Mailable
     use Queueable, SerializesModels;
 
     protected $meiocomunicacao;
-    public function __construct($id)
+    protected $url;
+    public function __construct($id, $url)
     {
         $this->meiocomunicacao = i12ChecagemMeioComunicacao::find($id);
+        $this->url = $url;
         if (!$this->meiocomunicacao) throw new Exception('Nenhum meio de comunicação encontrado com o id ' . $id);
         if ($this->meiocomunicacao->expirado) throw new Exception('Meio de comunicação expirado');
     }
@@ -24,7 +26,8 @@ class ValidacaoMeioComunicacaoMail extends Mailable
     public function build()
     {
         $content = [
-          'meiocomunicacao' => $this->meiocomunicacao
+          'meiocomunicacao' => $this->meiocomunicacao,
+          'url' => $this->url
         ];
         return $this->markdown('emails.icomservices.validacaoemail') //pass here your email blade file
             ->subject($this->meiocomunicacao->subject)

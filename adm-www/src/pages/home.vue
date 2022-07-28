@@ -8,7 +8,8 @@
             <q-card-section>
               <div class="row">
                 <div class="col-12 full-width row justify-center">
-                  <lottie-animation  :animationData="lottieindex" :speed="1" :loop="true" autoPlay style="max-width: 400px" />
+                  <lottieinternal arquivo="remote-work-management" />
+                  <!-- <lottie-animation  :animationData="lottieindex" :speed="1" :loop="true" autoPlay style="max-width: 400px" /> -->
                 </div>
               </div>
             </q-card-section>
@@ -27,14 +28,12 @@
 </template>
 
 <script>
-var lottieindex = require('src/assets/lotties/remote-work-management.json')
 export default {
   name: 'home',
   components: {
   },
   data () {
     return {
-      lottieindex
     }
   },
   async mounted () {

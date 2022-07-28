@@ -354,6 +354,21 @@ export default async ({ Vue, store }) => {
       if (hideMask) uuid = uuid.replace('-', '')
       return uuid
     },
+    emailhide (email, showcharcount = 3) {
+      let hide = email.split('@')[0].length - showcharcount
+      var r = new RegExp('.{' + hide + '}@', 'g')
+      return email.replace(r, '***@')
+    },
+    emailphone (phone, countIni = 2, countEnd = 4) {
+      if (typeof phone === 'undefined') return ''
+      if (phone ? phone === '' : true) return ''
+      var init = phone.substring(0, countIni)
+      var ind = phone.length - countEnd
+      var end = phone.substring(ind)
+      const char = '*'
+      const telNewNum = init + char.repeat(ind - countIni) + end
+      return telNewNum
+    },
     replaceAll (str, needle, replacement) {
       if ((str === '') || (needle === '')) return str
       var i = 0

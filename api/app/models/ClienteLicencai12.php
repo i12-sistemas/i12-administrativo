@@ -18,6 +18,7 @@ class ClienteLicencai12 extends Model
   {
       return strtoupper(utf8_encode($value));
   }
+
   public function setnumeroAttribute($value)
   {
       $this->attributes['numero'] = utf8dec($value);
@@ -56,18 +57,19 @@ class ClienteLicencai12 extends Model
 
   public function getbloqueadoAttribute($value)
   {
-      $agora = Carbon::now();
-      $d = ($this->databloqueiototal < $agora) || ($this->atual != 1);
-      return $d;
+    $agora = Carbon::now();
+    $d = ($this->databloqueiototal < $agora) || ($this->atual != 1);
+    return $d;
   }
+
   public function getexpiradoAttribute($value)
   {
-      $agora = Carbon::now();
-      $d = ($this->datavencimento < $agora) || ($this->atual != 1);
-      return $d;
+    $agora = Carbon::now();
+    $d = ($this->datavencimento < $agora) || ($this->atual != 1);
+    return $d;
   }  
 
-    public function getstatusAttribute($value)
+  public function getstatusAttribute($value)
   {
       if($this->bloqueado) {
         return 'Bloqueado';
@@ -81,7 +83,8 @@ class ClienteLicencai12 extends Model
       $d = ($this->datavencimento < $agora) || ($this->atual != 1);
       return $d;
   }  
-    public function getdiasrestantesAttribute($value)
+  
+  public function getdiasrestantesAttribute($value)
   {
       $d = 0;
       if(!$this->bloqueado) {
@@ -89,7 +92,4 @@ class ClienteLicencai12 extends Model
       }
       return $d;
   }  
-
-  
-  
 }

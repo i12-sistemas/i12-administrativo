@@ -14,13 +14,19 @@
       @keyup.13="actRequest"
       >
       <template v-slot:prepend>
-          <q-icon name="lock"/>
-        </template>
+        <q-icon name="lock"/>
+      </template>
     </q-input>
   </q-card-section>
+  <q-card-section class="text-center q-py-md" v-if="(recaptchasitekey ? recaptchasitekey !== '' : false)">
+    <div class="full-width row justify-center items-center">
+      <div v-if="recaptchaloading">carregando...</div>
+      <vue-recaptcha ref="recaptcha" :sitekey="recaptchasitekey" @verify="verify" :loadRecaptchaScript="true" @render="rendered" ></vue-recaptcha>
+    </div>
+  </q-card-section>
   <q-card-actions align="center" class="row wrap justify-between q-px-md content-start">
-    <q-btn class="full-width q-py-sm" unelevated color="primary" text-color="white" icon="far fa-keyboard" label="Acessar"
-      :loading="sending" @click="actRequest"
+    <q-btn class="full-width q-py-sm" unelevated  text-color="white" icon="far fa-keyboard" label="Acessar"
+      :loading="sending" @click="actRequest" color="primary"
       />
   </q-card-actions>
   <q-card-section>
@@ -33,6 +39,7 @@
 
 <script>
 
+import VueRecaptcha from 'vue-recaptcha'
 import { mapActions } from 'vuex'
 import axios from 'axios'
 export default {
@@ -40,17 +47,37 @@ export default {
     return {
       username: '',
       password: '',
+      recaptchaloading: true,
+      recaptchatoken: null,
+      recaptchasitekey: null,
       sending: false,
       redirect: null
     }
   },
+  components: {
+    VueRecaptcha
+  },
   computed: {
-    allowpost () {
-      return ((this.username !== '') && (this.password !== ''))
+    allowpost: function () {
+      var app = this
+      var b = true
+      try {
+        if (app.sending) throw new Error('Em loading')
+        if (app.username ? app.username === '' : true) throw new Error('username inválido')
+        if (app.password ? app.password === '' : true) throw new Error('password inválido')
+        if (app.recaptchasitekey ? app.recaptchasitekey !== '' : false) {
+          if (!app.recaptchatoken) throw new Error('Sem recaptcha nota')
+        }
+      } catch (error) {
+        b = false
+      }
+      return b
     }
   },
   async mounted () {
     var app = this
+    app.recaptchasitekey = app.$configini.RECAPTCHA_KEY ? app.$configini.RECAPTCHA_KEY : null
+    if (app.recaptchasitekey ? app.recaptchasitekey === '' : true) app.recaptchasitekey = null
     if (app.$route.query) {
       if (app.$route.query.redirect) app.redirect = app.$route.query.redirect
     }
@@ -71,6 +98,12 @@ export default {
         await app.$router.push({ name: 'home' })
       }
     },
+    rendered (id) {
+      this.recaptchaloading = false
+    },
+    async verify (response) {
+      this.recaptchatoken = response
+    },
     async closeApp () {
       // var app = this
       navigator.app.exitApp()
@@ -89,6 +122,10 @@ export default {
       app.sending = true
       let ret = await app.sendRequest()
       if (!ret.ok) {
+        app.recaptchatoken = null
+        if (app.recaptchasitekey ? app.recaptchasitekey !== '' : false) {
+          app.$refs.recaptcha.reset()
+        }
         app.actShowError('Acesso restrito', ret.msg, 4000)
       }
       app.sending = false
@@ -129,6 +166,10 @@ export default {
         return { ok: false, msg: error.message }
       }
 
+      var params = {}
+      if (app.recaptchasitekey ? app.recaptchasitekey !== '' : false) {
+        params['g-recaptcha-response'] = app.recaptchatoken
+      }
       var credentials = 'Basic ' + btoa(app.username + ':' + app.password)
       var req = axios.create({
         baseURL: app.$configini.API_URL,
@@ -142,7 +183,7 @@ export default {
           'Content-Type': 'application/json;charset=UTF-8'
         }
       })
-      var ret = await req.post('v1/auth').then(response => {
+      var ret = await req.post('v1/auth', params).then(response => {
         let data = response.data
         return data
       }

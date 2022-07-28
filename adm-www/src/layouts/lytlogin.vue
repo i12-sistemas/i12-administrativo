@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh lpR fFf">
+  <q-layout view="lHh lpR fff">
     <q-page-container class="bg-lyt">
       <q-page class="full-width row justify-center " :class="$q.platform.is.mobile ? '' : 'full-height items-center'">
         <div class="column col-xs-12 col-sm-11 col-lg-8 col-xl-8">
@@ -11,7 +11,7 @@
                     <div class="row flex-center full-width" >
                       <q-card flat class="full-width"  style="border: 6px solid rgba(255, 255, 255, 0.541);" >
                         <q-card-section class="bg-white justify-center items-center text-center">
-                          <img src="~assets/Logo-i12-horizontal150x50.png"  @click="$router.push({ name: 'home' })" width="100%" style="max-width: 300px" >
+                          <img src="~assets/Logo-i12-horizontal150x50.png"  width="100%" style="max-width: 300px" >
                         </q-card-section>
                         <q-separator spaced inset  />
                         <q-card-section class="q-pa-none q-ma-none">
@@ -23,7 +23,7 @@
                     </div>
                   </div>
                   <div class="col-md-8 q-pa-sm" v-if="$q.screen.gt.sm">
-                    <lottie-animation  :animationData="lottielogin" :speed="1" :loop="true" autoPlay />
+                    <lottieinternal arquivo="secure-login" />
                   </div>
                 </div>
               </q-card-section>
@@ -42,7 +42,6 @@
 </template>
 
 <script>
-var lottielogin = require('src/assets/lotties/secure-login.json')
 import datapackage from '../../package.json'
 import { openURL } from 'quasar'
 import moment from 'moment'
@@ -50,7 +49,6 @@ export default {
   name: 'lytLoginDispositivo',
   data () {
     return {
-      lottielogin,
       appPackage: datapackage,
       year: 2021,
       tab: 'mails',

@@ -62,7 +62,7 @@ class PlacaMercosul {
     if (typeof number === 'number' && number >= 0 && number <= 9) {
       return table[number]
     } else {
-      console.log(`${number} fora do range, deve ser de 0 até 9`)
+      console.info(`${number} fora do range, deve ser de 0 até 9`)
       return number
     }
   }
@@ -90,7 +90,7 @@ class PlacaMercosul {
         return '' + m1 + m2 + _t._conversionTable(parseInt(m3)) + m4
       })
     } else {
-      console.log(`${placa} não está no formato antigo, conversão não realizada`)
+      console.info(`${placa} não está no formato antigo, conversão não realizada`)
       return placa
     }
   }
@@ -115,7 +115,7 @@ class PlacaMercosul {
     if (this._validate(placa)) {
       return placa.replace(this.REGEX_PLACA_GENERICA, '$1 $2').toUpperCase()
     } else {
-      console.log(`${placa} não é uma placa válida, máscara não aplicada`)
+      console.info(`${placa} não é uma placa válida, máscara não aplicada`)
       return placa
     }
   }
@@ -125,7 +125,7 @@ class PlacaMercosul {
     if (typeof placa === 'string') {
       return placa.replace(this.REGEX_REPLACE, '')
     } else {
-      console.log(`${placa} não é válido para esta operção [unmask], por favor informe uma string nos seguintes formatos AAA-9999, AAA 9999, AAA9999 ou AAA9A99 `)
+      console.info(`${placa} não é válido para esta operção [unmask], por favor informe uma string nos seguintes formatos AAA-9999, AAA 9999, AAA9999 ou AAA9A99 `)
       return placa
     }
   }

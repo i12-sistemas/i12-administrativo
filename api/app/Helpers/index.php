@@ -1,4 +1,13 @@
 <?php
+
+if (! function_exists('raiseIsOperador')) {
+  function raiseIsOperador(){
+    $permissoes = session('permissoes');
+    if(!$permissoes) throw new Exception("Sem permissão de acesso [nível operador]");
+    if(!$permissoes->isoperador) throw new Exception("Sem permissão de acesso [nível operador]");
+  }
+}
+
 if (! function_exists('getIp')) {
   function getIp(){
     foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key){
@@ -64,6 +73,13 @@ if (! function_exists('ucutf8dec')) {
     function ucutf8dec($string) {
         $return = utf8_decode(mb_strtoupper($string, 'UTF-8') );
         return $return;
+    }
+}
+
+
+if (! function_exists('isemail')) {
+    function isemail($email) {
+      return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 }
 
@@ -529,7 +545,7 @@ if (! function_exists('TrataJson')) {
         
         return $s;
     }
-    }
+  }
     
 
 

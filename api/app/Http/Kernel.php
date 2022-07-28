@@ -55,13 +55,13 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'useradmin' => \App\Http\Middleware\AuthUserAdmin::class,
         'authicomservices' => \App\Http\Middleware\AuthiComServicesEmpresa::class,
+        'authpainelcliente' => \App\Http\Middleware\PainelDoClienteAuth::class,
 
         'cors' => \App\Http\Middleware\CorsMiddleware::class,
         
         'checkpermissao' => \App\Http\Middleware\CheckPermissao::class,
         // auth admin
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
-        'painelcliente' => \App\Http\Middleware\ClienteAuth::class,
         'adm' => \App\Http\Middleware\AdminAuth::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,

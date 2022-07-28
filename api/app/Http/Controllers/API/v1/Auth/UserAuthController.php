@@ -27,10 +27,30 @@ class UserAuthController extends Controller
     // autenticação de usuário e senha chega no header
     try {
       header('Cache-Control: no-cache, must-revalidate, max-age=0');
-
       $has_supplied_credentials = !(empty($_SERVER['PHP_AUTH_USER']) && empty($_SERVER['PHP_AUTH_PW']));
       if (!$has_supplied_credentials) 
         throw new Exception('Acesso não autorizado!');
+
+
+      $rules = [
+        recaptchaFieldName() => recaptchaRuleName()
+      ];
+      $messages = [
+          recaptchaFieldName() => 'Validação humana falhou',
+          'recaptcha' => 'Validação humana falhou',
+          'validation.recaptcha' => 'Validação humana falhou',
+          'g-recaptcha-response' => 'Validação humana falhou',
+      ];    
+      $validator = Validator::make($request->all(), $rules, $messages);
+      if ($validator->fails()) {
+          $msgs = [];
+          $errors = $validator->errors();
+          foreach ($errors->all() as $message) {
+              $msgs[] = $message;
+          }
+          $ret->data = $msgs;
+          throw new Exception(join("; ", $msgs));
+      }               
 
       $forcenewsession = isset($request->forcenewsession) ? IntVal($request->forcenewsession) : 0;
       $forcenewsession = ($forcenewsession == 1) || ($forcenewsession == '1');
@@ -45,9 +65,9 @@ class UserAuthController extends Controller
       if (!$usuario) 
         throw new Exception('Acesso não autorizado!');
 
-      $empresa = $usuario->empresa(ENV('CNPJ_I12'));
-      if (!$empresa) throw new Exception('Usuário sem permissão a está empresa');
-      if (!($empresa->codempresa > 0)) throw new Exception('Usuário sem permissão a está empresa');
+      $empresa = $usuario->empresa(env('CNPJ_I12', ''));
+      if (!$empresa) throw new Exception('Usuário sem permissão a está empresa *');
+      if (!($empresa->codempresa > 0)) throw new Exception('Usuário sem permissão a está empresa **');
 
     } catch (\Throwable $th) {
       $ret->msg = $th->getMessage();

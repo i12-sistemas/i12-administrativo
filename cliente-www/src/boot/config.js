@@ -1,4 +1,4 @@
-import configini from 'src/statics/config/index.js'
+import configini from 'src/statics/env.js'
 import icons from 'src/assets/icons.js'
 export default async ({ Vue }) => {
   Vue.prototype.$configini = configini

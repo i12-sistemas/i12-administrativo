@@ -6,6 +6,7 @@
   "type": "project",
   "require": {
     "php": "^7.2.5",
+    "biscolab/laravel-recaptcha": "^5.0",
     "fideloper/proxy": "^4.2",
     "guzzlehttp/guzzle": "^7.4",
     "intervention/image": "^2.5",
@@ -14,6 +15,7 @@
     "laravel/tinker": "^2.0",
     "league/flysystem-aws-s3-v3": "*",
     "pusher/pusher-php-server": "~4.0",
+    "soundasleep/html2text": "~1.1",
     "ramsey/uuid": "^4.2"
   },
   "require-dev": {

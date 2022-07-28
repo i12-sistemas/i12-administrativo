@@ -9,18 +9,30 @@
 
 Route::prefix('/')->namespace('API')->group(function () {
     Route::get('teste', 'TesteController@teste');
+    Route::get('notifica/{numero}', 'v1\icomservices\painelcliente\AtendimentoController@enviaNotificacaoAtendimento');
 });
 
 
-Route::prefix('/v1/webicom')->namespace('API\v1\webicom')->group(function () {
-    Route::post('/clientes/list', 'ClientesController@list');
+// Route::prefix('/v1/webicom')->namespace('API\v1\webicom')->group(function () {
+//     Route::post('/clientes/list', 'ClientesController@list');
   
-});
+// });
+
 
 Route::prefix('/v1')->namespace('API\v1')->middleware(['cors'])->group(function () {
-
+  
+  // admin
   Route::post('auth', 'Auth\UserAuthController@auth');
   Route::post('auth/checklogin', 'Auth\UserAuthController@checklogin');
+  
+
+  Route::post('contato/auth', 'Auth\ContatoAuthController@auth'); // autenticação do usuario quando uma unica empresa
+  Route::post('contato/auth2', 'Auth\ContatoAuthController@auth2'); // autenticação da empresa quando mais de uma empresa
+  Route::post('contato/auth/checklogin', 'Auth\ContatoAuthController@checklogin');
+  Route::post('contato/auth/pwd/reset/request', 'Auth\ContatoAuthController@resetpwd_request');
+  Route::post('contato/auth/pwd/reset/check', 'Auth\ContatoAuthController@resetpwd_checkcode');
+  Route::post('contato/auth/pwd/reset/changepwd', 'Auth\ContatoAuthController@resetpwd_changepwd');
+  
   
     // // autenticação basicAuth tem que morrer quando todos os cliente estiverem com a versão acima da 379
     // // mudanças no delphi nos forçaram a essa mudança
@@ -55,6 +67,12 @@ Route::prefix('/v1')->namespace('API\v1')->middleware(['cors'])->group(function 
 });
 
 
+Route::prefix('/v1/public')->middleware(['cors'])->group(function () {
+  Route::group(['namespace' => 'API\v1\icomServices', 'prefix' => 'meiocomunicacao'], function () {
+    Route::post('/validar', 'ValidarMeioComunicacaoController@validar');
+  });
+});
+
 Route::prefix('/v1/icomservices')->namespace('API\v1\icomServices')->middleware(['cors', 'authicomservices'])->group(function () {
   Route::group(['prefix' => 'server'], function () {
     Route::post('/', 'i12DatabasesController@update');
@@ -69,6 +87,14 @@ Route::prefix('/v1/icomservices')->namespace('API\v1\icomServices')->middleware(
   Route::group(['prefix' => 'terminal'], function () {
     Route::post('/', 'i12TerminaisController@update');
   });
+  
+  Route::group(['prefix' => 'painelcliente'], function () {
+    // atualização do dados do contato do icom
+    Route::post('contato/update', 'painelcliente\AtendimentoController@contatoupdate');
+    Route::get('atendimentos/contadores', 'painelcliente\AtendimentoController@contadores');
+    Route::get('url', 'painelcliente\AtendimentoController@url'); 
+  });
+  
 });
 
 Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'useradmin'], ['except' => ['tabelaibpt.download']])->group(function () {
@@ -85,10 +111,8 @@ Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'user
     });
   });
 
-
   Route::group(['prefix' => 'backup'], function () {
     // Route::get('/', 'i12DatabasesController@index');
-    
     Route::get('/', 'BackupController@list');
     Route::get('dash', 'BackupController@dash');
 
@@ -122,6 +146,21 @@ Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'user
   
 });
 
+Route::prefix('/v1/painelcliente')->namespace('API\v1\painelcliente')->middleware(['cors', 'authpainelcliente'])->group(function () {
+  Route::group(['prefix' => 'atendimentos'], function () {
+    Route::get('/', 'OrdemServicoController@list');
+    Route::get('/atendimento/{numero}', 'OrdemServicoController@detalhe');
+
+    Route::post('/atendimento/add', 'OrdemServicoController@addchamado');
+
+    Route::post('/atendimento/{numero}/interacao/add', 'OrdemServicoController@interacaoAdd');
+    Route::post('/atendimento/{numero}/lido', 'OrdemServicoController@setreadchamado');
+
+    Route::get('contadores', 'OrdemServicoController@contadores');
+  });
+});
+
+
 // novo
 // Route::prefix('/v2/painelcliente')->namespace('API\v2\painelcliente')->group(function () {
   
@@ -131,11 +170,11 @@ Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'user
 //sistema antigo e migração
 // Route::prefix('/v1/painelcliente')->namespace('API\v1\painelcliente')->group(function () {
 //     // acesso publico - fora do csrf 
-//     Route::post('/meuschamados/contadores', 'OrdemServicoController@contadoresGroupCliente')->name('api.painelcliente.chamados.contadoresGroupCliente')->middleware('BashAuthUser');
+//     
 //     Route::post('/meuschamados/ultimaatualizacao', 'OrdemServicoController@ultimaatualizacao')->name('api.painelcliente.chamados.ultimaatualizacao')->middleware('BashAuthUser');
 
 
-//     Route::post('/chamados/addchamado', 'OrdemServicoController@addchamado')->name('api.painelcliente.chamados.addchamado');
+//     
 //     Route::post('/chamados/list', 'OrdemServicoController@list')->name('api.painelcliente.chamados.list');
 //     Route::post('/chamados/contadores', 'OrdemServicoController@contadores')->name('api.painelcliente.chamados.contadores');
     
@@ -143,7 +182,7 @@ Route::prefix('/v1/admin')->namespace('API\v1\admin')->middleware(['cors', 'user
 
 
 //     Route::post('/chamados/showdetalhe', 'OrdemServicoController@showdetalhe')->name('api.painelcliente.chamados.showdetalhe');
-//     Route::post('/chamados/addmessageusuario', 'OrdemServicoController@addmessageusuario')->name('api.painelcliente.chamados.addmessageusuario');
+//     
 //     Route::post('/chamados/setreadchamado', 'OrdemServicoController@setreadchamado')->name('api.painelcliente.chamados.setreadchamado');
 //     Route::post('/chamados/avaliachamado', 'OrdemServicoController@avaliachamado')->name('api.painelcliente.chamados.avaliachamado');
 //     Route::post('/chamados/avaliaperguntalist', 'OrdemServicoController@avaliaperguntalist')->name('api.painelcliente.chamados.avaliaperguntalist');

@@ -120,7 +120,7 @@ class i12LogErrosController extends Controller
             $registrolog->so                = $request->so;
             $registrolog->releaseapp        = $request->releaseapp;
             $registrolog->md5app            = $request->md5app;
-            $registrolog->ip            = $request->ip();
+            $registrolog->ip            = \Request::getClientIp(true);
             // Caso a variável de anexo for válida, salva as informações da imagem.
             if ($printscreen) {
               $registrolog->filename      = $filename;

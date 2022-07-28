@@ -10,15 +10,13 @@ const routes = [
       { path: 'usuario/logout', name: 'logout.usuario', component: () => import('pages/login/logoff-user.vue') }
     ]
   },
-  // {
-  //   path: '/p',
-  //   component: () => import('layouts/lytpublico.vue'),
-  //   children: [
-  //     { path: 'notas/empresa/xmlpendente', name: 'publico.coletas.xmlpendente', component: () => import('pages/publico/coletas/xmlpendente.vue') },
-  //     { path: 'rastreabilidade', name: 'publico.carga.rastreabilidade', component: () => import('pages/publico/carga/rastreabilidade.vue') },
-  //     { path: 'palete', name: 'publico.palete.consulta', component: () => import('pages/publico/palete/consulta.vue') }
-  //   ]
-  // },
+  {
+    path: '/public',
+    component: () => import('layouts/lytpublico.vue'),
+    children: [
+      { path: 'validacao/:tipo', name: 'publico.coletas.xmlpendente', component: () => import('pages/publico/validacao/index.vue') }
+    ]
+  },
   {
     path: '/',
     component: () => import('layouts/lytdefault.vue'),

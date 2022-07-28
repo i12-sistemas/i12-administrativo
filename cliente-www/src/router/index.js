@@ -29,6 +29,7 @@ export default function (/* { store, ssrContext } */) {
   Router.beforeEach((to, from, next) => {
     var usrlogged = false
     try {
+      var usuario = Router.app.$store.state.usuario.usuario
       usrlogged = Router.app.$store.state.usuario.logado
     } catch (error) {
       console.error(error)
@@ -42,22 +43,21 @@ export default function (/* { store, ssrContext } */) {
         next({ name: 'login.usuario', query: { redirect: to.path } })
       }
     }
-    // if (to.matched.some(record => record.meta.permissao)) {
-    //   var idpermissao = ''
-    //   for (let index = 0; index < to.matched.length; index++) {
-    //     const element = to.matched[index]
-    //     if (element.meta) {
-    //       if (element.meta.permissao) {
-    //         idpermissao = element.meta.permissao
-    //         break
-    //       }
-    //     }
-    //   }
-    // var permissao = Router.app.$helpers.permite(idpermissao)
-    // if (!permissao.ok) {
-    //   next({ name: 'usuario.sempermissao', query: { idpermissao: idpermissao, redirect: from.path } })
-    // }
-    // }
+    if (to.matched.some(record => record.meta.permissao === 'operador')) {
+      console.log()
+      // var idpermissao = ''
+      // for (let index = 0; index < to.matched.length; index++) {
+      //   const element = to.matched[index]
+      //   if (element.meta) {
+      //     if (element.meta.permissao) {
+      //       idpermissao = element.meta.permissao
+      //       break
+      //     }
+      //   }
+      // }
+      // var permissao = Router.app.$helpers.permite(idpermissao)
+      if (!usuario.ehoperador) next({ name: 'usuario.sempermissao', query: { idpermissao: 'operador', redirect: to.fullPath } })
+    }
     next()
   })
 

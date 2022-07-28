@@ -5,24 +5,44 @@ namespace App\models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class Contato extends Model
 {
+  use SoftDeletes;
   protected $table      = 'contato';
   protected $primaryKey = 'id';
   public $timestamps    = false;
-  public $hidden        = ['foto', 'fotomd5'];
-  protected $dates      = ['datanasc', 'i12ultimaatualizacao'];
+  protected $hidden        = ['foto', 'fotomd5'];
+  protected $dates      = ['datanasc', 'i12ultimaatualizacao', 'deleted_at', 'emailchecked_at', 'whatsappchecked_at'];
 
   // protected $fillable   = ['pessoa', 'cpfcnpj', 'nome', 'fantasia', 'logradouro', 'endereco', 'num', 'bairro', 'cidade', 'compl','uf', 'cep', 'obs', 'idcliente',  idfornecedor',  'idusuario', 'idcolaborador', 'tel1', 'tel2', 'tel3', 'tel4', 'tel5', 'desctel1', 'desctel2', 'desctel3', 'desctel4', 'desctel5', 'email', 'datanasc', 'lixeira', 'password', 'foto', 'fotomd5', 'i12ultimaatualizacao']
 
+    public function exportLogin() {
+      return [
+        'id' => $this->id,
+        'nome' => $this->nome,
+        'whatsapp' => $this->whatsapp,
+        'email' => $this->emailprincipal,
+        'fotoicon' => $this->fotoiconurl
+      ];
+    }
+    public function exportPublico() {
+      return [
+        'id' => $this->id,
+        'nome' => $this->nome,
+        'fotoicon' => $this->fotoiconurl,
+      ];
+    }
   // atributes
     public function getfotoiconurlAttribute() {
       try {
         if ($this->foto) {
+          $disk = Storage::disk('s3icom_public');
           $filename = $this->fotomd5;
-          $internal = 'images/contato/size-100x100/' . $filename;
-          $exists = Storage::disk('domains')->exists($internal);
+          $internal = 'images/contato/100x100/' . $filename;
+          $exists = $disk->exists($internal);
           if (!$exists) {
             $image = $this->foto;
             $img = Image::make($image);
@@ -31,17 +51,35 @@ class Contato extends Model
               $constraint->aspectRatio();
             });
             $img->stream(); // <-- Key point
-            Storage::disk('domains')->put($internal, $img, 'domains');
-            $exists = Storage::disk('domains')->exists($internal);
+            $disk->put($internal, $img);
+            $exists = $disk->exists($internal);
           }
-          return $exists ? url('/storage/' . $internal) : null;
+          return $exists ? $disk->url($internal) : null;
         } else {
             return null;
         }
-
       } catch (\Exception $e) {
+        \Log::error($e);
         return null;
       }
+    }
+
+    public function getwhatsappvalidadoAttribute($value) {
+      $valid = False;
+      if ($this->whatsapp ? $this->whatsapp === '' : true) return $valid;
+      if ($this->whatsappcheckeduuid ? $this->whatsappcheckeduuid === '' : true) return $valid;
+      if (!$this->whatsappchecked_at) return $valid;
+      $valid = true;
+      return $valid;
+    }
+
+    public function getemailvalidadoAttribute($value) {
+      $valid = False;
+      if ($this->emailprincipal ? !isemail($this->emailprincipal) : true) return $valid;
+      if ($this->emailcheckeduuid ? $this->emailcheckeduuid === '' : true) return $valid;
+      if (!$this->emailchecked_at) return $valid;
+      $valid = true;
+      return $valid;
     }
 
     // cpfcnpj
@@ -193,6 +231,8 @@ class Contato extends Model
     {
       $this->attributes['tel3'] =  utf8_decode($value);
     }
+
+    
 
     // tel4
     public function gettel4Attribute($value)
@@ -365,6 +405,18 @@ class Contato extends Model
                   ->join('clientes', 'contatocliente.idcliente', '=', 'clientes.codcliente')
                   ->where('clientes.ativo', '=', 1)
                   ->orderBy('clientes.nome');
+  }
+
+  public function clientes()
+  {
+      return $this->hasManyThrough(
+        Clientes::class,
+        ContatoCliente::class,
+        'idcontato',
+        'codcliente',
+        'id',
+        'idcliente'
+      )->where('clientes.ativo', '=', 1)->orderby('clientes.nome');
   }
 
   public function export($complete = false)

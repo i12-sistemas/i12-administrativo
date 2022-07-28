@@ -36,6 +36,52 @@ class LoginController extends Controller
     }
 
 
+      
+    public function auth(Request $request)  {
+      $ret = new RetornoApiController;
+      try {
+          $credentials = $this->validate($request, [
+              'login'     => 'required|min:1|max:20',
+              'password'  => 'required|min:1|max:30',
+          ]);
+                      
+          // $redirectTo = isset($request->redirect) ? $request->redirect : '/painelcliente';
+          $login = isset($request->login) ? $request->login : '';
+          $password = isset($request->password) ? $request->password : '';
+          
+          $contato = Contato::select('id', 'nome', 'cpfcnpj', 'password')->where('cpfcnpj', $login)->first();
+          if(!$contato) throw new Exception("Nenhum usuário encontrado!");
+          
+
+          if (!($contato->lixeira==0)){
+              throw new Exception("Usuário inativo/excluído!");
+          }
+          $passwordcrypt = md5('cont' . $contato->id . $password);
+              
+          $userdata = array(
+              'cpfcnpj'     => $contato->cpfcnpj,
+              'password'  => $passwordcrypt
+          );            
+
+          // attempt to do the login
+          if (Auth::guard('painelcliente')->attempt($userdata)) {
+              $dadoscontato = ['id'=>$contato->id, 'nome'=>$contato->nome, 'cpfcnpj'=>$contato->cpfcnpj];
+              Auth::guard('painelcliente')->User = $dadoscontato;
+              $ret->ok = true;
+              $ret->rows = $contato;
+              return $ret->toJson();
+          }else{
+              $ret->msg = 'Não foi autenticado.';
+          }
+          
+      } catch (Exception $e) {
+          $ret->msg =  $e->GetMessage();
+      }
+      return $ret->toJson();
+
+  }
+
+
     public function logout(Request $request)
     {
         if(Auth::guard('painelcliente')->getSession()->has('cliente')){
@@ -387,50 +433,7 @@ class LoginController extends Controller
 
     }
     
-    
-    public function auth(Request $request)  {
-        $ret = new RetornoApiController;
-        try {
-            $credentials = $this->validate($request, [
-                'login'     => 'required|min:1|max:20',
-                'password'  => 'required|min:1|max:30',
-            ]);
-                        
-            // $redirectTo = isset($request->redirect) ? $request->redirect : '/painelcliente';
-            $login = isset($request->login) ? $request->login : '';
-            $password = isset($request->password) ? $request->password : '';
-            
-            $contato = Contato::select('id', 'nome', 'cpfcnpj', 'password')->where('cpfcnpj', $login)->first();
-            if(!$contato) throw new Exception("Nenhum usuário encontrado!");
-            
-
-            if (!($contato->lixeira==0)){
-                throw new Exception("Usuário inativo/excluído!");
-            }
-            $passwordcrypt = md5('cont' . $contato->id . $password);
-                
-            $userdata = array(
-                'cpfcnpj'     => $contato->cpfcnpj,
-                'password'  => $passwordcrypt
-            );            
-
-            // attempt to do the login
-            if (Auth::guard('painelcliente')->attempt($userdata)) {
-                $dadoscontato = ['id'=>$contato->id, 'nome'=>$contato->nome, 'cpfcnpj'=>$contato->cpfcnpj];
-                Auth::guard('painelcliente')->User = $dadoscontato;
-                $ret->ok = true;
-                $ret->rows = $contato;
-                return $ret->toJson();
-            }else{
-                $ret->msg = 'Não foi autenticado.';
-            }
-            
-        } catch (Exception $e) {
-            $ret->msg =  $e->GetMessage();
-        }
-        return $ret->toJson();
-
-    }
+  
     //antigo metodo desativar em 01/01/2020
     public function autoauthcreatetoken(Request $request){
 
@@ -490,7 +493,7 @@ class LoginController extends Controller
             $sessaobd->active = 0;
             $saved = $sessaobd->save();
             if (!$saved){
-                throw new Exception('Falha ao sessão!'); 
+              throw new Exception('Falha ao sessão!'); 
             }
             DB::commit();
            

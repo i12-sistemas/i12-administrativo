@@ -1,9 +1,10 @@
 <template>
 <div>
-  <q-page class="">
-    <div class="row doc-page" :class="$q.platform.is.mobile ? 'q-pa-0' : 'q-pa-md'" >
-      <div class="col-sm-12 full-width" :class="$q.platform.is.mobile ? 'q-pa-0' : 'q-pt-md'">
-        <q-card class="my-card" bordered flat>
+  <q-page class="" >
+    <div class="full-width header-top-bg bg-primary shadow-up-21"></div>
+    <div class="row doc-header full-width" >
+      <div class="col-xs-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 " :class="$q.screen.lt.sm ? '' : 'q-pa-lg'" >
+        <q-card class="bg-white " flat bordered  :class="$q.platform.is.mobile ? 'q-ma-sm' : ''">
           <q-card-section horizontal>
             <q-card-section class="col-10">
               <div class="text-h6">{{dataset.nome_old}}</div>
@@ -43,7 +44,7 @@
               </div>
             </div>
           </q-card-section>
-          <q-card-section class="q-ma-none q-pa-none"  >
+          <!-- <q-card-section class="q-ma-none q-pa-none"  >
             <q-table :data="dataset.clientes" :columns="columns" dense :loading="loading" id="tableempresas" flat hide-bottom
               row-key="id" :rows-per-page-options="[0]" title="Empresas associadas a mim" >
               <template v-slot:body-cell-razaosocial="props">
@@ -71,7 +72,7 @@
                 </q-td>
               </template>
             </q-table>
-          </q-card-section>
+          </q-card-section> -->
           <q-card-section class="text-right text-caption text-accent" v-if="dataset.usernametype === 'celular'">
             <div>Se o número de celular for alterado, será necessário refazer seu acesso. <q-icon name="info" class="q-mr-md" size="20px" /> </div>
           </q-card-section>
@@ -83,11 +84,9 @@
         </q-card>
       </div>
       <q-page-sticky position="top" expand>
-        <q-toolbar class="bg-white text-primary shadow-up-21">
-          <q-btn flat dense round @click="$store.dispatch('homedashboard/togglemenu')" aria-label="Menu" icon="menu" />
+        <q-toolbar class="bg-primary text-white">
           <q-btn flat round icon="arrow_back" @click="$router.go(-1)"/>
-          <q-separator vertical inset v-if="!$q.platform.is.mobile" spaced/>
-          <q-toolbar-title>Meu perfil de usuário</q-toolbar-title>
+          <q-toolbar-title>Meu perfil (*Dev)</q-toolbar-title>
           <q-btn  icon="sync" :round="$q.platform.is.mobile" flat @click="refreshData(null)" :loading="loading" />
         </q-toolbar>
       </q-page-sticky>
@@ -97,13 +96,13 @@
 </template>
 
 <script>
-import Usuario from 'src/mvc/models/usuario.js'
+import Contato from 'src/mvc/models/contato.js'
 export default {
   name: 'usuario.meuperfil',
   components: {
   },
   data () {
-    var dataset = new Usuario()
+    var dataset = new Contato()
     return {
       dataset,
       rows: [],

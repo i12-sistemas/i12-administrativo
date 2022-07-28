@@ -11,9 +11,7 @@ node_modules
 
 /release
 
-/src/statics/config/
-/src/statics/config/index.js
-/src/statics/config/examples/index_prod.js
+/src/statics/env.js
 
 # Cordova related directories and files
 /src-cordova/node_modules

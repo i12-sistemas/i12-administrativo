@@ -76,6 +76,14 @@ return [
           'region' => env('AWS_ICOM_DEFAULT_REGION'),
           'bucket' => env('AWS_ICOM_BUCKET'),
         ],
+        's3icom_public' => [
+          'driver' => 's3',
+          'key' => env('AWS_ICOM_ACCESS_KEY_ID'),
+          'secret' => env('AWS_ICOM_SECRET_ACCESS_KEY'),
+          'region' => env('AWS_ICOM_DEFAULT_REGION'),
+          'bucket' => env('AWS_ICOM_BUCKET'),
+          'visibility' => 'public',
+        ],
         's3backup' => [
           'driver' => 's3',
           'key' => env('AWS_BACKUP_ACCESS_KEY_ID'),

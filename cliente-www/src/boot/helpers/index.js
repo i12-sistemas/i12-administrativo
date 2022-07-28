@@ -5,8 +5,8 @@ import PlacaMercosul from './placa-mercosul-brasil'
 import dialoginputfloat from 'src/components/cpn-input-dialog-float.vue'
 import dialogfilterfloatinterval from 'src/components/cpn-filter-float-interval.vue'
 import dialogfilterdatetimeinterval from 'src/components/cpn-filter-datetime-interval.vue'
-import dialogtableshowcolumn from 'src/components/tableshowcolumn.vue'
 import { QSpinnerOval } from 'quasar'
+import axios from 'axios'
 
 /* eslint-disable no-useless-escape */
 export default async ({ Vue, store }) => {
@@ -41,22 +41,6 @@ export default async ({ Vue, store }) => {
       }
       var local = 'tablecols_' + localstorageid + '_' + (usuariologado ? usuariologado.id : '')
       return localStorage.getItem(local) ? JSON.parse(localStorage.getItem(local)) : null
-    },
-    async dialogConfigTableColunas (app, visibleColumns, columns, title = null) {
-      return new Promise((resolve) => {
-        app.$q.dialog({
-          parent: app,
-          component: dialogtableshowcolumn,
-          colvisible: visibleColumns,
-          columns: columns,
-          title: title,
-          cancel: true
-        }).onOk(async data => {
-          resolve({ ok: true, data: data })
-        }).onCancel(() => {
-          resolve({ ok: false })
-        })
-      })
     },
     async dialogFilterFloatInterval (app, dados) {
       return new Promise((resolve) => {
@@ -98,6 +82,19 @@ export default async ({ Vue, store }) => {
         }).onCancel(() => {
           resolve(null)
         })
+      })
+    },
+    dialogProgress (app, pMsg = '', pTitle = '') {
+      return app.$q.dialog({
+        title: pTitle,
+        message: pMsg,
+        class: 'bg-grey-4 text-black',
+        progress: {
+          spinner: QSpinnerOval,
+          color: 'black'
+        },
+        persistent: true, // we want the user to not be able to close it
+        ok: false // we want the user to not be able to close it
       })
     },
     toBool (val) {
@@ -173,6 +170,11 @@ export default async ({ Vue, store }) => {
         message: 'Texto copiado para sua área de transferência',
         caption: 'Texto copiado :: ' + pStr
       })
+    },
+    firstName (name) {
+      if (name ? name === '' : true) return ''
+      const splitOnSpace = name.split(' ')
+      return splitOnSpace[0]
     },
     errorReturn (pError, pValidacao = false) {
       try {
@@ -341,6 +343,21 @@ export default async ({ Vue, store }) => {
       if (hideMask) uuid = uuid.replace('-', '')
       return uuid
     },
+    emailhide (email, showcharcount = 3) {
+      let hide = email.split('@')[0].length - showcharcount
+      var r = new RegExp('.{' + hide + '}@', 'g')
+      return email.replace(r, '***@')
+    },
+    emailphone (phone, countIni = 2, countEnd = 4) {
+      if (typeof phone === 'undefined') return ''
+      if (phone ? phone === '' : true) return ''
+      var init = phone.substring(0, countIni)
+      var ind = phone.length - countEnd
+      var end = phone.substring(ind)
+      const char = '*'
+      const telNewNum = init + char.repeat(ind - countIni) + end
+      return telNewNum
+    },
     replaceAll (str, needle, replacement) {
       if ((str === '') || (needle === '')) return str
       var i = 0
@@ -476,6 +493,22 @@ export default async ({ Vue, store }) => {
       var rminutes = Math.round(minutes)
       return rhours + siglaHour + separator + rminutes + siglaMin
     },
+    getIp () {
+      return new Promise((resolve) => {
+        var url = 'https://ipgeolocation.abstractapi.com/v1/?api_key=' + Vue.prototype.$configini.ABSTRACTAPI
+        axios.get(url).then(response => {
+          resolve({ ok: true, data: response.data })
+        }).catch(error => {
+          let msg = error
+          if (error.response) {
+            msg = 'Code: ' + error.response.status + ' - ' + error.response.data.message
+          } else {
+            msg = error.message
+          }
+          resolve({ ok: false, msg: msg })
+        })
+      })
+    },
     getPerc (vrlatual, vlrtotal, multiplicoCem = true, QtdeCasaDecimal = 2, forcelimit100 = false) {
       if (vrlatual === 0 || vlrtotal === 0) {
         return 0
@@ -594,6 +627,8 @@ export default async ({ Vue, store }) => {
       } else {
         mask = 'DD/MM/YYYY - HH:mm' + (OmiteSegundo ? '' : ':ss')
       }
+      var checkhora = dh.format('HH:mm:ss')
+      if (checkhora === '00:00:00') mask = 'DD/MM/YYYY'
       return dh.format(mask)
     },
     datetimeRelativeToday (datetime) {
@@ -929,6 +964,8 @@ export default async ({ Vue, store }) => {
     },
     bytesToHumanFileSizeString (fileSizeInBytes) {
       var i = -1
+      if (typeof fileSizeInBytes === 'undefined') return '0 Kb'
+      if (fileSizeInBytes ? fileSizeInBytes <= 0 : true) return '0 Kb'
       var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
       do {
         fileSizeInBytes = fileSizeInBytes / 1024
@@ -936,19 +973,6 @@ export default async ({ Vue, store }) => {
       } while (fileSizeInBytes > 1024)
 
       return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i]
-    },
-    dialogProgress (app, pMsg = '', pTitle = '') {
-      return app.$q.dialog({
-        title: pTitle,
-        message: pMsg,
-        class: 'bg-grey-4 text-black',
-        progress: {
-          spinner: QSpinnerOval,
-          color: 'black'
-        },
-        persistent: true, // we want the user to not be able to close it
-        ok: false // we want the user to not be able to close it
-      })
     },
     validaEmail (email) {
       var reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/

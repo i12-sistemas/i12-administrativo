@@ -11,6 +11,7 @@ module.exports = function (ctx) {
     boot: [
       'i18n',
       'config',
+      'addressbar-color',
       'eventbus',
       '/helpers',
       'pusher',
@@ -91,7 +92,8 @@ module.exports = function (ctx) {
         'Notify',
         'Dialog',
         'BottomSheet',
-        'Meta'
+        'Meta',
+        'AddressbarColor'
       ]
     },
 
@@ -124,21 +126,12 @@ module.exports = function (ctx) {
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
-      port: 8089,
-      https: {
-        key: fs.readFileSync('.cert/localhost-key.pem'),
-        cert: fs.readFileSync('.cert/localhost-cert.pem')
-      //   ca: fs.readFileSync('/path/to/ca.pem')
-      },
-      allowedHosts: [
-        'cdvfile://localhost',
-        'http://localhost',
-        'https://localhost',
-        'http://192.168.0.112',
-        'https://192.168.0.112',
-        'http://localhost:8089',
-        'http://192.168.0.30:8089'
-      ],
+      port: 8090,
+      // https: {
+      //   key: fs.readFileSync('.cert/localhost-key.pem'),
+      //   cert: fs.readFileSync('.cert/localhost-cert.pem')
+      // //   ca: fs.readFileSync('/path/to/ca.pem')
+      // },
       before (app) {
         const cors = require('cors')
         app.options('*', cors())
@@ -165,13 +158,13 @@ module.exports = function (ctx) {
       // workboxPluginMode: 'InjectManifest',
       // workboxOptions: {}, // only for NON InjectManifest
       manifest: {
-        name: 'i12 - Painel do Cliente',
+        name: 'Cliente - i12 Sistemas',
         short_name: 'clientewebapp',
         // description: 'A Quasar Framework app',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
-        theme_color: '#1976d2',
+        theme_color: '#027BE3',
         icons: [
           {
             'src': 'statics/icons/icon-128x128.png',

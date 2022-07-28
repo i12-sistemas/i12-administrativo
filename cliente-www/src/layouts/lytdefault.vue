@@ -4,113 +4,130 @@
     <!-- menu opção geral somente mobile -->
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered content-class="bg-grey-1" >
       <q-scroll-area class="fit">
-        <div class="q-mt-sm" style="border-color: #e0e0e0">
-          <div class="bg-white full-width text-center items-center no-wrap cursor-pointer" >
-            <img src="~assets/Logo-i12-horizontal150x50.png" style="max-height: 36px;" @click="$router.push({ name: 'home' })" >
+        <div class="q-pa-md bg-white"  >
+          <div class=" full-width text-center items-center no-wrap cursor-pointer" >
+            <img src="~assets/Logo-i12-horizontal150x50.png" style="max-height: 40px;" @click="$router.push({ name: 'home' })" >
           </div>
         </div>
         <!-- usuario -->
         <div>
-          <q-list>
-            <q-expansion-item
-              expand-separator
-              icon="perm_identity"
-              :label="$helpers.strEllipsis(usuariologado.nome, 15)"
-            >
-            <q-card class="q-ma-sm bg-white" bordered style="max-width: 280px"  >
-              <q-card-section >
-                <div class="" v-if="usuariologado.celular !== ''"><q-icon name="phone" /> {{usuariologado.celular}}</div>
-                <div class="" v-if="usuariologado.email !== ''"><q-icon name="mail" /> {{usuariologado.email}}</div>
-              </q-card-section>
-              <q-separator   />
-              <q-card-section >
-                <div class="text-caption text-weight-bold">Empresas associadas</div>
-                <div class="ellipsis text-left" v-if="usuariologado.clientescount > 0">
-                  <div class="ellipsis text-caption" v-for="(cli, k) in usuariologado.clientes" :key="'cli' + k">
-                    {{ cli.cnpj ? $helpers.mascaraDocCPFCNPJ(cli.cnpj) + ' :: ': ''}}
-                    {{cli.razaosocial !== '' ? cli.razaosocial : cli.fantasia }}
-                    <q-tooltip :delay="500">
-                      {{ cli.cnpj ? $helpers.mascaraDocCPFCNPJ(cli.cnpj) + ' :: ': ''}} {{cli.razaosocial !== '' ? cli.razaosocial : cli.fantasia }}
-                    </q-tooltip>
-                  </div>
-                </div>
-                <div class="text-weight-bold" v-if="usuariologado.clientescount <= 0">Nenhuma empresa identificada</div>
-              </q-card-section>
+          <q-separator />
+          <q-list separator class="bg-grey-2">
+            <q-expansion-item expand-separator default-opened icon="perm_identity" :label="$helpers.strEllipsis(usuariologado.nome, 15)" >
               <q-separator />
-              <q-card-section class="q-pa-none">
-                <q-btn label="Meu perfil" :to="({name: 'usuario.meuperfil'})" v-close-popup unelevated icon="fa fa-user-circle" class="full-width" />
-                <q-btn label="Sair" :to="({name: 'logout.usuario'})" v-close-popup unelevated icon="power_settings_new" class="full-width" />
-              </q-card-section>
-            </q-card>
+              <q-list class="bg-white" style="border-left: 5px solid #027be3">
+                <q-item  v-if="usuariologado">
+                  <q-item-section>
+                    <q-item-label caption  class="row q-gutter-xs">
+                      <q-badge color="black"  text-color="white" label="Administrador" v-if="usuariologado.ehadministrador" />
+                      <q-badge color="green" text-color="white" label="Financeiro" v-if="usuariologado.ehfinanceiro && !usuariologado.ehadministrador" />
+                      <q-badge color="blue-10" text-color="white" label="Operador" v-if="usuariologado.ehoperador && !usuariologado.ehadministrador" />
+                      <q-badge color="cyan" text-color="white" label="Contador" v-if="usuariologado.ehcontador && !usuariologado.ehadministrador" />
+                    </q-item-label>
+                    <q-item-label >{{usuariologado.permissao}}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item  v-if="usuariologado.whatsapp ? usuariologado.whatsapp !== '' : false">
+                  <q-item-section avatar>
+                    <q-icon name="whatsapp" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label> {{usuariologado.whatsapp}}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item  v-if="usuariologado.email ? usuariologado.email !== '' : false">
+                  <q-item-section avatar>
+                    <q-icon name="mail" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label> {{usuariologado.email}}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple :to="({name: 'usuario.meuperfil'})" disable>
+                  <q-item-section avatar>
+                    <q-icon name="edit" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Meu perfil</q-item-label>
+                    <q-item-label caption>Gerenciar meu perfil</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
             </q-expansion-item>
+            <q-expansion-item default-opened icon="attach_money" label="Financeiro" caption="Contratos e serviços" v-if="usuariologado.ehfinanceiro">
+              <q-separator />
+              <q-list class="bg-white" style="border-left: 5px solid #027be3">
+                <q-item clickable v-ripple :to="{ name: 'financeiro.mensalidades' }" disable>
+                  <q-item-section avatar>
+                    <q-icon name="search"  />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Faturas</q-item-label>
+                    <q-item-label caption>Gerenciar suas faturas</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple :to="{ name: 'financeiro.contratos' }" disable>
+                  <q-item-section avatar>
+                    <q-icon name="add" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Contratos</q-item-label>
+                    <q-item-label caption>Contratos e vigências</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
+            <q-expansion-item default-opened icon="support" label="Suporte" caption="Abertura de tickets e ajuda" v-if="usuariologado.ehoperador">
+              <q-separator />
+              <q-list class="bg-white" style="border-left: 5px solid #027be3">
+                <q-item clickable v-ripple :to="{ name: 'atendimentos' }">
+                  <q-item-section avatar>
+                    <q-icon name="search" v-if="!usuariodashloading" />
+                    <q-spinner size="1.5em" :thickness="5" v-if="usuariodashloading" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Meus atendimentos</q-item-label>
+                    <q-item-label caption>Gerenciar meus atendimentos</q-item-label>
+                  </q-item-section>
+                  <q-item-section avatar side v-if="usuariologado.dashboard_atendimento ? typeof usuariologado.dashboard_atendimento.emabertos !== 'undefined' : false">
+                    <q-avatar size="28px" font-size="13px" color="light-blue-3" text-color="black">{{usuariologado.dashboard_atendimento.emabertos > 99 ? '+99' : usuariologado.dashboard_atendimento.emabertos}}</q-avatar>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-ripple :to="{ name: 'atendimentos.novo' }">
+                  <q-item-section avatar>
+                    <q-icon name="add" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Novo atendimento</q-item-label>
+                    <q-item-label caption>Registrar novo atendimento</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
+            <q-separator  />
+            <q-expansion-item default-opened icon="receipt_long" label="Contabilidade" caption="Gestão de documentos fiscais" v-if="usuariologado.ehcontador">
+              <q-separator />
+              <q-list class="bg-white" style="border-left: 5px solid #027be3">
+                <q-item clickable v-ripple :to="{ name: 'atendimentos' }" disable>
+                  <q-item-section avatar>
+                    <q-icon name="search" v-if="!usuariodashloading" />
+                    <q-spinner size="1.5em" :thickness="5" v-if="usuariodashloading" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>NF-e</q-item-label>
+                    <q-item-label caption>Em desenvolvimento</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
+            <q-separator  />
+            <q-item clickable  v-ripple :to="({name: 'logout.usuario'})" v-if="(usuariologado)" >
+              <q-item-section avatar>
+                <q-icon name="power_settings_new" />
+              </q-item-section>
+              <q-item-section>Sair</q-item-section>
+            </q-item>
           </q-list>
-        </div>
-        <q-separator  />
-        <q-list>
-          <q-item class="header-item" v-if="(!usuariologado.permitestatusgeral) && (!usuariologado.pemitefup) && (usuariologado.followupcount < 1)">
-            <q-item-section class="text-weight-bold">OPERACIONAL</q-item-section>
-          </q-item>
-          <q-item clickable class="q-badge menu-lista-estilo" v-ripple :to="{ name: 'home' }" v-if="(usuariologado ? usuariologado.permitestatusgeral : false)" >
-            <q-item-section avatar>
-              <q-icon name="dashboard" />
-            </q-item-section>
-            <q-item-section>STATUS GERAL</q-item-section>
-          </q-item>
-          <q-item clickable class="q-badge menu-lista-estilo" v-ripple :to="{ name: 'followup.dashboard1' }" v-if="(usuariologado ? (usuariologado.followupcount > 0) : false) && (usuariologado ? usuariologado.pemitefup : false)">
-            <q-item-section avatar>
-              <q-icon name="insights" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>FOLLOW UP</q-item-label>
-              <q-item-label caption lines="2" style="color: white">Indicadores de desempenho</q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-item clickable class="q-badge menu-lista-estilo" v-ripple :to="{ name: 'followup.consulta' }" v-if="(usuariologado ? (usuariologado.followupcount > 0) : false) && (usuariologado ? usuariologado.pemitefup : false)">
-            <q-item-section avatar>
-              <q-icon name="insights" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>FOLLOW UP</q-item-label>
-              <q-item-label caption lines="2" style="color: white">Acesso ao sistema FUP</q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-item clickable class="q-badge menu-lista-estilo"  v-ripple :to="{ name: 'followup.usuario' }" v-if="(usuariologado.clienteusuariodadmin === false)">
-            <q-item-section avatar>
-              <q-icon name="group" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>GESTÃO DE USUÁRIOS</q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-item class="header-item">
-            <q-item-section class="text-weight-bold">COLETAS</q-item-section>
-          </q-item>
-          <q-item clickable class="q-badge menu-lista-estilo" v-ripple :to="{ name: 'coletas.consulta' }">
-            <q-item-section avatar>
-              <q-icon name="search" />
-            </q-item-section>
-            <q-item-section>MINHAS COLETAS</q-item-section>
-          </q-item>
-          <q-item class="header-item">
-            <q-item-section class="text-weight-bold">ENTREGAS</q-item-section>
-          </q-item>
-          <q-item clickable class="q-badge menu-lista-estilo" v-ripple :to="{ name: 'entregas.consulta' }">
-            <q-item-section avatar>
-              <q-icon name="search" />
-            </q-item-section>
-            <q-item-section>MINHAS ENTREGAS</q-item-section>
-          </q-item>
-          <q-item clickable class="q-badge menu-lista-estilo" v-ripple :to="{ name: 'entregas.consulta.rapida' }">
-            <q-item-section avatar>
-              <q-icon name="travel_explore" />
-            </q-item-section>
-            <q-item-section>RASTREAR ENTREGA</q-item-section>
-          </q-item>
-        </q-list>
-        <div class="bg-white text-primary q-mt-xl q-mx-sm rounded-borders" style="border: 1px solid rgb(63 81 181 / 33%)">
-          <div class="text-subtitle q-px-lg q-py-md" style="line-height: 18px">
-            <b>Transportar</b> é a forma <b>Conecta</b> de encurtar distâncias.
-          </div>
         </div>
       </q-scroll-area>
     </q-drawer>
@@ -125,8 +142,8 @@
       </transition>
     </q-page-container>
 
-    <q-footer class="bg-grey-2" >
-      <div class="q-mt-md text-grey-8 text-caption q-pa-xs text-center">
+    <q-footer :class="$q.platform.is.mobile ? 'bg-primary text-grey-1' : 'bg-grey-2 text-grey-8'"  bordered v-if="$route.name === 'home'">
+      <div class="q-mt-md  text-caption q-pa-xs text-center">
         <div><span class="text-weight-bold">{{appPackage.productName}} :: {{appPackage.description}}</span> | Versão {{appPackage.version}} release {{$helpers.datetimeToBR(appPackage.releasedatetime)}}</div>
         <div>© Copyright {{year ? year : ''}} :: <a href="https://www.i12.com.br" target="_blank">i12.com.br</a></div>
       </div>
@@ -135,7 +152,6 @@
 </template>
 
 <script>
-
 import datapackage from '../../package.json'
 import moment from 'moment'
 
@@ -145,9 +161,11 @@ export default {
   },
   data () {
     return {
+      title: 'i12 Sistemas',
       year: 2021,
       optionsmenu: null,
       appPackage: datapackage,
+      usuariodashloading: false,
       loading: false,
       notificationsnoread: 0,
       // padrao de notificacao
@@ -162,33 +180,60 @@ export default {
   },
   created: function () {
     this.$eventbus.$on('togglemenu', this.toggleMenu)
-    this.$eventbus.$on('homedashboardupdated', this.onhomedashboardupdated)
+    this.$eventbus.$on('usuariodash', this.onusuariodash)
+    this.$eventbus.$on('usuariodash_updated', this.onusuariodash_updated)
     this.$eventbus.$on('setdrawerr', this.onSetDrawerR)
     this.$eventbus.$on('notification_add', this.onAddNotificacao)
   },
   beforeDestroy: function () {
     this.$eventbus.$off('togglemenu', this.toggleMenu)
-    this.$eventbus.$off('homedashboardupdated', this.onhomedashboardupdated)
+    this.$eventbus.$off('usuariodash', this.onusuariodash)
+    this.$eventbus.$off('usuariodash_updated', this.onusuariodash_updated)
     this.$eventbus.$off('notification_add', this.onAddNotificacao)
     this.$eventbus.$off('drawerr_remove', this.onRemoveDrawerR)
   },
+  meta () {
+    return {
+      title: this.title
+    //   description: { name: 'description', content: 'Page 1' },
+    //   keywords: { name: 'keywords', content: 'Quasar website' },
+    //   equiv: { 'http-equiv': 'Content-Type', content: 'text/html; charset=UTF-8' },
+    //   // note: for Open Graph type metadata you will need to use SSR, to ensure page is rendered by the server
+    //   ogTitle: {
+    //     name: 'og:title',
+    //     // optional; similar to titleTemplate, but allows templating with other meta properties
+    //     template (ogTitle) {
+    //       return `${ogTitle} - My Website`
+    //     }
+    //   }
+    }
+  },
   async mounted () {
     var app = this
-    app.optionsmenu = this.$store.state.homedashboard.options
-    app.permitefollowupconsulta = app.$helpers.permite('followup.consulta')
+    if (app.clientelogado) app.title = app.clientelogado.nome + ' :: i12 Sistemas'
+    this.$q.addressbarColor.set('#a2e3fa')
+    // app.optionsmenu = this.$store.state.homedashboard.options
+    // app.permitefollowupconsulta = app.$helpers.permite('followup.consulta')
     app.year = moment().year()
-    if (!app.$store.state.homedashboard.ultimaatualizacao) {
-      await app.$store.dispatch('homedashboard/refresh')
-    }
-    app.onhomedashboardupdated()
+    if (app.usuariologado ? !app.usuariologado.dashboard_atendimento : false) app.$eventbus.$emit('usuariodash', false)
   },
   computed: {
     usuariologado: function () {
       var app = this
       let u = null
       if (app.$store.state.usuario.logado) {
-        if (app.$store.state.usuario.user) {
-          u = app.$store.state.usuario.user
+        if (app.$store.state.usuario.usuario) {
+          u = app.$store.state.usuario.usuario
+        }
+      }
+      return u
+    },
+    clientelogado: function () {
+      var app = this
+      let u = null
+      if (app.$store.state.usuario.logado) {
+        if (app.$store.state.usuario.cliente) {
+          u = app.$store.state.usuario.cliente
         }
       }
       return u
@@ -232,13 +277,16 @@ export default {
       this.leftDrawerOpen = false
       this.currentRComponent = null
     },
-    onhomedashboardupdated () {
+    async onusuariodash (ShowNotification = false) {
       var app = this
-      app.loading = true
-      app.optionsmenu = app.$store.state.homedashboard.options
-      setTimeout(() => {
-        app.loading = false
-      }, 100)
+      if (app.usuariodashloading) return
+      app.usuariodashloading = true
+      console.log('iniciado')
+      await app.$store.dispatch('usuario/refreshDashboard', ShowNotification)
+    },
+    async onusuariodash_updated () {
+      var app = this
+      app.usuariodashloading = false
     },
     actAbrirLink (status) {
       var app = this
@@ -307,14 +355,13 @@ export default {
 }
 .doc-page {
   padding: 16px 46px;
-  padding-top: 80px;
   font-weight: 300;
   max-width: 900px;
   margin-left: auto;
   margin-right: auto
 }
 .doc-header {
-  padding-top: 80px;
+  padding-top: 35px;
 }
 .dialogfullheightdesktop {
   width: 700px;
@@ -332,10 +379,10 @@ export default {
 @media (max-width: 600px) {
   .doc-page {
     padding: 0px;
-    padding-top: 45px;
+    padding-top: 35px;
   }
   .doc-header {
-    padding-top: 45px;
+    padding-top: 55px;
   }
   .titletoobarcustom {
     min-width: auto;
@@ -346,12 +393,11 @@ export default {
     background-color: #d6d1d1;
   }
 
-  .menu-lista-estilo {
-    color: white !important;
-    margin: 2px;
-    /* margin-top: 2px;
-    margin-bottom: 2px; */
-    font-weight: 500 !important;
-    border-radius: 2px;
-  }
+.header-top-bg {
+  height: 110px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0 0 8px 8px;
+}
 </style>

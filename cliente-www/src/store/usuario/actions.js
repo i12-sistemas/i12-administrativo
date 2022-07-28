@@ -1,13 +1,22 @@
 import Vue from 'vue'
 import axios from 'axios'
 
+export function checkip ({ commit, state, dispatch }) {
+  if (state.ip) return
+  var meuip = Vue.prototype.$helpers.getIp()
+  meuip.then(function (retorno) {
+    if (retorno.ok) {
+      commit('setip', retorno.data)
+    }
+  })
+}
+
 export async function checklogon ({ commit, state, dispatch }) {
-  var credentials = 'Basic ' + btoa(state.userlocal.username + ':' + state.token)
+  var credentials = 'Basic ' + btoa(state.token + ':' + state.accesscode)
   var req = axios.create({
     baseURL: Vue.prototype.$configini.API_URL,
     withCredentials: false,
     headers: {
-      'x-auth-uuid': state.uuid,
       'Authorization': credentials,
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Authorization',
@@ -15,7 +24,7 @@ export async function checklogon ({ commit, state, dispatch }) {
       'Content-Type': 'application/json;charset=UTF-8'
     }
   })
-  var ret = await req.post('v1/painelcliente/login/usuario/checklogin').then(response => {
+  var ret = await req.post('v1/contato/auth/checklogin').then(response => {
     let data = response.data
     return data
   }
@@ -31,43 +40,19 @@ export async function checklogon ({ commit, state, dispatch }) {
   await commit('setret', ret)
   if (ret.ok) {
     await commit('setusuariologado', ret.data)
-    if (state.logado) {
-      var pusher = Vue.prototype.$pusher
-      var channelDeviceAll = pusher.subscribe('allusersconnected')
-      var channelDeviceUser = pusher.subscribe('usr-' + state.user.username.toString().toLowerCase())
-      channelDeviceUser.bind('disconnect', function (params) {
-        var b = Vue.prototype.$helpers.toBool(params)
-        if (b) dispatch('logout')
-      })
-      channelDeviceAll.bind('disconnect', function (params) {
-        var b = Vue.prototype.$helpers.toBool(params)
-        if (b) dispatch('logout')
-      })
-
-      channelDeviceUser.bind('info', function (params) {
-        if (typeof params === 'object') {
-          Vue.prototype.$eventbus.$emit('notification_add', params)
-        }
-      })
-      channelDeviceAll.bind('info', function (params) {
-        if (typeof params === 'object') Vue.prototype.$eventbus.$emit('notification_add', params)
-      })
-    } else {
-      Vue.prototype.$pusher.unsubscribe('allusersconnected')
-      Vue.prototype.$pusher.unsubscribe('usr-' + state.user.username.toString().toLowerCase())
-    }
   }
 }
 
-export async function getlocalstorage ({ commit, state, dispatch }) {
+export async function init ({ commit, state, dispatch }) {
   await commit('getlocalstorage')
-  if (state.uuid && state.userlocal && state.token && state.expireat) {
+  if (state.username && state.expireat && state.token && state.accesscode && !state.logado) {
     await dispatch('checklogon')
   }
 }
-export async function setlocalstorage ({ commit, dispatch }, dados) {
+
+export async function auth ({ commit, dispatch, state }, dados) {
   await commit('setlocalstorage', dados)
-  await dispatch('getlocalstorage')
+  if (state.token && state.accesscode) await dispatch('checklogon')
 }
 
 export async function adderror401 ({ commit, state, dispatch }) {
@@ -95,4 +80,33 @@ export async function logout ({ commit }) {
   commit('logout')
   this.$router.push({ name: 'login.usuario' })
   return true
+}
+
+export async function refreshDashboard ({ commit, state }, showNotification = false) {
+  Vue.prototype.$eventbus.$emit('usuariodash_loading')
+  var contato = state.usuario
+  var ret = await contato.refreshDashboard()
+  if (ret.ok) {
+    await commit('refreshUserLogado', contato)
+    Vue.prototype.$eventbus.$emit('usuariodash_updated')
+    if (showNotification) {
+      Vue.prototype.$q.notify({
+        color: 'positive',
+        position: 'bottom',
+        timeout: 1500,
+        message: 'Informações atualizadas'
+      })
+    }
+  } else {
+    Vue.prototype.$eventbus.$emit('usuariodash_updated')
+    if (showNotification) {
+      Vue.prototype.$q.notify({
+        color: 'red',
+        position: 'bottom',
+        timeout: 4000,
+        message: 'Falha ao atualizar contadores',
+        caption: ret.msg
+      })
+    }
+  }
 }
